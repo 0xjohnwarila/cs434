@@ -10,7 +10,10 @@ X[:,1:14] = data[:,:13]
 
 Y = data[:, 13]
 
-W = np.linalg.inv(np.matrix((X.transpose() @ X))) @ X.transpose() @ Y
+print(X)
+print(Y)
+
+W = np.linalg.inv(X.transpose().dot(X)).dot(X.transpose().dot(Y))
 print(W)
 W = np.asarray(W).reshape(-1)
 Y = np.asarray(Y).reshape(-1)
@@ -25,7 +28,7 @@ predicted_y = wX.sum(axis=1)
 sumY = 0
 
 for y, yH in zip(Y,predicted_y):
-    sumY += (y - yH) ** 2 
+    sumY += (y - yH) 
 
 print(sumY)
 

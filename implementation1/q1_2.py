@@ -3,35 +3,57 @@ import numpy as np
 formatter = "{:.2f}".format
 np.set_printoptions(formatter={'float_kind':formatter})
 
-data = np.genfromtxt('housing_train.csv', delimiter=',', dtype='float')
 
-X = np.ones(data.shape)
-X[:,1:14] = data[:,:13]
+def train():
+    data = np.genfromtxt('housing_train.csv', delimiter=',', dtype='float')
 
-Y = data[:, 13]
+    X = np.ones(data.shape)
+    X[:,1:14] = data[:,:13]
 
-print(X)
-print(Y)
+    Y = data[:, 13]
 
-W = np.linalg.inv(X.transpose().dot(X)).dot(X.transpose().dot(Y))
-print(W)
-W = np.asarray(W).reshape(-1)
-Y = np.asarray(Y).reshape(-1)
 
-wX = X
+    Y = np.asarray(Y).reshape(-1)
 
-for row in wX:
-    row = row * W
+    W = np.linalg.inv(X.transpose().dot(X)).dot(X.transpose().dot(Y))
+    W = np.asarray(W).reshape(-1)
 
-predicted_y = wX.sum(axis=1)
+    return W, run_model(X, Y, W)
 
-sumY = 0
+def eval(W):
+    data = np.genfromtxt('housing_test.csv', delimiter=',', dtype='float')
+    
+    X = np.ones(data.shape)
+    X[:, 1:14] = data[:,:13]
 
-for y, yH in zip(Y,predicted_y):
-    sumY += (y - yH) 
+    Y = data[:, 13]
 
-print(sumY)
+    Y = np.asarray(Y).reshape(-1)
 
-ase = sumY / 350
+    return run_model(X, Y, W)
 
-print(ase)
+
+def run_model(X, Y, W):
+    wX = np.zeros(X.shape)
+
+    for i in range(wX.shape[0]):
+        row = np.multiply(X[i], W)
+        wX[i] = row
+
+        predicted_y = wX.sum(axis=1)
+
+        sumY = 0
+
+    for y, yH in zip(Y,predicted_y):
+        sumY += (y - yH)**2 
+
+    ase = sumY / Y.size
+    return ase
+
+
+weights, training_ase = train()
+print('weights', weights)
+print('training ASE:', training_ase)
+
+testing_ase = eval(weights)
+print('testing ASE:',testing_ase)

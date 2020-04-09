@@ -1,5 +1,7 @@
 import numpy as np
 
+# LINEAR REGRESSION: NO BIAS TERM
+
 # Formating for printing
 formatter = "{:.2f}".format
 np.set_printoptions(formatter={'float_kind':formatter})
@@ -31,10 +33,10 @@ def get_data(filename):
     data = np.genfromtxt(filename, delimiter=',', dtype='float')
 
     # Build an array of ones
-    X = np.ones(data.shape)
-    # Set all but the first column to be equal to the first 13 columns of the
-    # data
-    X[:, 1:14] = data[:,:13]
+    X = np.ones((data.shape[0], data.shape[1]-1))
+
+    # The X has no bias term in the first column
+    X = data[:,:13]
 
     # Set Y to be the 14th column of data
     Y = data[:, 13]

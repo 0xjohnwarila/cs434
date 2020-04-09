@@ -1,13 +1,14 @@
 import numpy as np
+import argparse
 
 # Formating for printing
 formatter = "{:.2f}".format
 np.set_printoptions(formatter={'float_kind':formatter})
 
 # train generates a set of weights from the training data
-def train():
+def train(training_data):
     # Get the data from the training file. X is params, Y is goal
-    X, Y = get_data('housing_train.csv')
+    X, Y = get_data(training_data)
 
     # Calculate the weights. (X^T X)^-1 X^T Y
     W = np.linalg.inv(X.transpose().dot(X)).dot(X.transpose().dot(Y))
@@ -18,9 +19,9 @@ def train():
     return W, run_model(X, Y, W)
 
 # eval gets the ASE for the testing data
-def eval(W):
+def eval(W, testing_data):
     # Get the data from the testing file
-    X, Y = get_data('housing_test.csv')
+    X, Y = get_data(testing_data)
 
     # Run the model and return ASE
     return run_model(X, Y, W)
@@ -66,10 +67,14 @@ def run_model(X, Y, W):
     ase = sumY / Y.size
     return ase
 
+parser = argparse.ArgumentParser(description='Linear regression for housing price')
+parser.add_argument('training_data', help='csv file with training data')
+parser.add_argument('testing_data', help='csv file with testing data')
+args = parser.parse_args()
 # Running the above methods
-weights, training_ase = train()
+weights, training_ase = train(args.training_data)
 print('weights', weights)
 print('training ASE:', training_ase)
 
-testing_ase = eval(weights)
+testing_ase = eval(weights, args.testing_data)
 print('testing ASE:',testing_ase)

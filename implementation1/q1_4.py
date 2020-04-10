@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+import matplotlib.pyplot as plt
 
 # Formating for printing
 formatter = "{:.2f}".format
@@ -10,7 +11,14 @@ def run(training_data, testing_data):
     rX, rY = get_data(training_data)
     tX, tY = get_data(testing_data)
 
+    # arrays to stores plot data
+    x_axis = []
+    rASE = []
+    tASE = []
+
     for i in range(10):
+        # create array to track new features
+        x_axis.append((i+1)*2)
 
         # add random sampled data into two new columns on training X matrix
         # and testing X matrix
@@ -20,10 +28,18 @@ def run(training_data, testing_data):
         # calculate the weights for each the training data
         W = calculate_weights(rX, rY)
 
-        # print results
-        print("Added Features: {}".format(i * 2))
-        print("Training ASE: {}".format(run_model(rX, rY, W)))
-        print("Testing ASE: {}".format(run_model(tX, tY, W)))
+        # add results to array of all ASE results
+        rASE.append(run_model(rX, rY, W))
+        tASE.append(run_model(tX, tY, W))
+
+    # plot data with matplotlib
+    training_plot = plt.plot(x_axis, rASE, 'bo--', label="Testing ASE")
+    testing_plot = plt.plot(x_axis, tASE, 'gs--', label="Training ASE")
+    plt.xlabel('Added Features')
+    plt.ylabel('ASE Value')
+    plt.legend()
+    plt.title("Training and Testing ASE vs. Features Added")
+    plt.show()
 
 def calculate_weights(X, Y):
     # Calculate the weights. (X^T X)^-1 X^T Y

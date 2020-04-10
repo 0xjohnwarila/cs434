@@ -33,8 +33,8 @@ def run(training_data, testing_data):
         tASE.append(run_model(tX, tY, W))
 
     # plot data with matplotlib
-    training_plot = plt.plot(x_axis, rASE, 'bo--', label="Testing ASE")
-    testing_plot = plt.plot(x_axis, tASE, 'gs--', label="Training ASE")
+    training_plot = plt.plot(x_axis, rASE, 'bo--', label="Training ASE")
+    testing_plot = plt.plot(x_axis, tASE, 'gs--', label="Testing ASE")
     plt.xlabel('Added Features')
     plt.ylabel('ASE Value')
     plt.legend()

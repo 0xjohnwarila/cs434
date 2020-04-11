@@ -33,11 +33,7 @@ def run_model(X, Y, W):
 def train(X, Y, tX, tY, e, lr):
     W = np.zeros(X.shape[1])
     
-    i = 0
-    while True:
-        # track number of iterations
-        i += 1
-        iterations.append(i)
+    for i in range(e):
 
         delta = np.zeros(X.shape[1])
 
@@ -47,11 +43,8 @@ def train(X, Y, tX, tY, e, lr):
 
         W = W - lr * delta
 
-        rASE.append(run_model(X, Y, W))
-        tASE.append(run_model(tX, tY, W))
-
-        if np.linalg.norm(delta) <= e:
-            break
+        #rASE.append(run_model(X, Y, W))
+        #tASE.append(run_model(tX, tY, W))
 
     return W
 
@@ -76,8 +69,12 @@ iterations = []
 rASE = []
 tASE = []
 
-W = train(X, Y, tX, tY, 10, 0.0000005)
+W = train(X, Y, tX, tY, 95, 0.0000000001)
 
+print(run_model(X, Y, W))
+print(run_model(tX, tY, W))
+
+'''
 # plot data with matplotlib
 training_plot = plt.plot(iterations, rASE, 'bo--', label="Training ASE")
 testing_plot = plt.plot(iterations, tASE, 'gs--', label="Testing ASE")
@@ -86,3 +83,4 @@ plt.ylabel('ASE Value')
 plt.legend()
 plt.title("Training and Testing ASE vs. Iteration Count")
 plt.show()
+'''

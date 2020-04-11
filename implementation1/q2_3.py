@@ -12,16 +12,20 @@ def sigmoid(W, X):
 
 # run_model calculates the cross entropy loss
 def run_model(X, Y, W):
-    # initialize sum var
-    sum = 0
+    correct = 0
 
-    # for each image:
-    # calculate entropy loss and sum
-    # return total loss
-    for i in range(X.shape[0]):
-        predictions = sigmoid(W, X[i])
-        sum = sum + Y[i] * np.log(predictions) + (1 - Y[i]) * np.log(1 - predictions)
-    return -sum
+    for i in range(Y.shape[0]):
+        y_hat = np.sum(X[i] * W)
+
+        if y_hat > .5:
+            y_hat = 1
+        else:
+            y_hat = 0
+
+        if y_hat == Y[i]:
+            correct += 1
+
+    return correct / Y.shape[0]
 
 # iterates batch gradient training
 # returns learned weights and training data for plotting

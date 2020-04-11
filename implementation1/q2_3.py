@@ -10,13 +10,16 @@ np.set_printoptions(formatter={'float_kind':formatter})
 def sigmoid(W, X):
     return 1 / (1 + np.exp(np.negative(W.transpose().dot(X))))
 
-# run_model calculates the cross entropy loss
+# run_model calculates the percent correct predictions
 def run_model(X, Y, W):
     correct = 0
 
+    # Loop over all outputs
     for i in range(Y.shape[0]):
+        # Get y hat probability of 1
         y_hat = np.sum(X[i] * W)
 
+        # If the y hat is greater than .5, then guess 1 and 0 otherwise
         if y_hat > .5:
             y_hat = 1
         else:
@@ -24,7 +27,7 @@ def run_model(X, Y, W):
 
         if y_hat == Y[i]:
             correct += 1
-
+    # Return the proportion of correct guesses
     return correct / Y.shape[0]
 
 # iterates batch gradient training
@@ -80,6 +83,7 @@ def get_data(filename):
 parser = argparse.ArgumentParser(description='Logistic Regression for Handwritten Numeric Identification')
 parser.add_argument('training_data', help='csv file with training data')
 parser.add_argument('testing_data', help='csv file with testing data')
+parser.add_argument('lambdas', nargs='+', type=float, help='list of space separated lamdas to test')
 args = parser.parse_args()
 
 # reading data from arguments
@@ -87,15 +91,20 @@ X, Y = get_data(args.training_data)
 tX, tY = get_data(args.testing_data)
 
 # running above functions and printing final loss
-W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001, .01)
-print('Training Accuracy (Cross-Entropy-Loss)', run_model(X, Y, W))
-print('Testing Accuracy (Cross-Entropy-Loss)', run_model(tX, tY, W))
+for l in args.lambdas:
+    W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001, l)
+    print('Train acc at lambda=', l, run_model(X, Y, W))
+    print('Test acc at lambda=', l, run_model(tX, tY, W))
+
+#W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001, .01)
+#print('Training Accuracy (Cross-Entropy-Loss)', run_model(X, Y, W))
+#print('Testing Accuracy (Cross-Entropy-Loss)', run_model(tX, tY, W))
 
 # plot data with matplotlib
-training_plot = plt.plot(rASE, 'b', label="Training Loss")
-testing_plot = plt.plot(tASE, 'g', label="Testing Loss")
-plt.xlabel('Number of Iterations')
-plt.ylabel('Loss Value')
-plt.legend()
-plt.title("Training and Testing Loss vs. Iteration Count")
-plt.show()
+#training_plot = plt.plot(rASE, 'b', label="Training Loss")
+#testing_plot = plt.plot(tASE, 'g', label="Testing Loss")
+#plt.xlabel('Number of Iterations')
+#plt.ylabel('Loss Value')
+#plt.legend()
+#plt.title("Training and Testing Loss vs. Iteration Count")
+#plt.show()

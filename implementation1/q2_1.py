@@ -51,7 +51,6 @@ def get_data(filename):
         for j in range(X.shape[1]):
             X[i][j] = X[i][j]/255
 
-    print(X)
     Y = data[:, 256]
 
     Y = np.asarray(Y).reshape(-1)
@@ -63,12 +62,14 @@ tX, tY = get_data('usps_test.csv')
 
 iterations = []
 
-W, rASE, tASE = train(X, Y, tX, tY, 100, 0.0001)
+W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001)
+print('Training Accuracy (Cross-Entropy-Loss)', run_model(X, Y, W))
+print('Testing Accuracy (Cross-Entropy-Loss)', run_model(tX, tY, W))
 
 # plot data with matplotlib
 
-training_plot = plt.plot(rASE, 'bo--', label="Training ASE")
-testing_plot = plt.plot(tASE, 'gs--', label="Testing ASE")
+training_plot = plt.plot(rASE, 'b', label="Training ASE")
+testing_plot = plt.plot(tASE, 'g', label="Testing ASE")
 plt.xlabel('Number of Iterations')
 plt.ylabel('ASE Value')
 plt.legend()

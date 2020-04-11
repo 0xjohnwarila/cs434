@@ -8,29 +8,18 @@ np.set_printoptions(formatter={'float_kind':formatter})
 def sigmoid(W, X):
     return 1 / (1 + np.exp(np.negative(W.transpose().dot(X))))
 
-# run_model calculates the ASE
+# run_model calculates the cross entropy loss
 def run_model(X, Y, W):
-    # Place holder matrix that will hold the X rows times the weights
-    wX = np.zeros(X.shape)
-
-    # For every row in X, multiply elementwise by W
-    for i in range(wX.shape[0]):
-        row = np.multiply(X[i], W)
-        wX[i] = row
-
-        # Get the predicted Y by summing the row
-        predicted_y = wX.sum(axis=1)
-
-    sumY = 0
-    # Sum the squared error between Y and predicted Y
-    for y, yH in zip(Y,predicted_y):
-        sumY += (y - yH)**2 
-
-    # Average for the average squared error
-    ase = sumY / Y.size
-    return ase
+    sum = 0
+    for i in range(X.shape[0]):
+        predictions = sigmoid(W, X[i])
+        sum = sum + Y[i] * np.log(predictions) + (1 - Y[i]) * np.log(1 - predictions)
+    return -sum
 
 def train(X, Y, tX, tY, e, lr):
+    training_loss = []
+    testing_loss = []
+
     W = np.zeros(X.shape[1])
     
     for i in range(e):
@@ -43,10 +32,12 @@ def train(X, Y, tX, tY, e, lr):
 
         W = W - lr * delta
 
-        #rASE.append(run_model(X, Y, W))
-        #tASE.append(run_model(tX, tY, W))
+        # if(i % 10 == 0):
+        training_loss.append(run_model(X, Y, W))
+        testing_loss.append(run_model(tX, tY, W))
 
-    return W
+    return W, training_loss, testing_loss
+
 
 def get_data(filename):
     # Load data
@@ -56,6 +47,11 @@ def get_data(filename):
 
     X[:, :256] = data[:, :256]
 
+    for i in range(X.shape[0]):
+        for j in range(X.shape[1]):
+            X[i][j] = X[i][j]/255
+
+    print(X)
     Y = data[:, 256]
 
     Y = np.asarray(Y).reshape(-1)
@@ -66,21 +62,15 @@ X, Y = get_data('usps_train.csv')
 tX, tY = get_data('usps_test.csv')
 
 iterations = []
-rASE = []
-tASE = []
 
-W = train(X, Y, tX, tY, 95, 0.0000000001)
+W, rASE, tASE = train(X, Y, tX, tY, 100, 0.0001)
 
-print(run_model(X, Y, W))
-print(run_model(tX, tY, W))
-
-'''
 # plot data with matplotlib
-training_plot = plt.plot(iterations, rASE, 'bo--', label="Training ASE")
-testing_plot = plt.plot(iterations, tASE, 'gs--', label="Testing ASE")
+
+training_plot = plt.plot(rASE, 'bo--', label="Training ASE")
+testing_plot = plt.plot(tASE, 'gs--', label="Testing ASE")
 plt.xlabel('Number of Iterations')
 plt.ylabel('ASE Value')
 plt.legend()
 plt.title("Training and Testing ASE vs. Iteration Count")
 plt.show()
-'''

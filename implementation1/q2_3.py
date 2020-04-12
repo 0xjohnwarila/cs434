@@ -53,11 +53,7 @@ def train(X, Y, tX, tY, e, lr, lam):
         # calculate W using the learning rate and the delta value
         W = W - lr * delta
 
-        # append learned weights to return arrays
-        training_loss.append(run_model(X, Y, W))
-        testing_loss.append(run_model(tX, tY, W))
-
-    return W, training_loss, testing_loss
+    return W
 
 # loads data from csv and returns X and Y array
 def get_data(filename):
@@ -90,21 +86,24 @@ args = parser.parse_args()
 X, Y = get_data(args.training_data)
 tX, tY = get_data(args.testing_data)
 
+training_accuracy = []
+testing_accuracy = []
+
 # running above functions and printing final loss
 for l in args.lambdas:
-    W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001, l)
-    print('Train acc at lambda=', l, run_model(X, Y, W))
-    print('Test acc at lambda=', l, run_model(tX, tY, W))
+    W = train(X, Y, tX, tY, 300, 0.001, l)
+    training_accuracy.append(run_model(X, Y, W))
+    testing_accuracy.append(run_model(tX, tY, W))
+    # print('Train acc at lambda=', l, run_model(X, Y, W))
+    # print('Test acc at lambda=', l, run_model(tX, tY, W))
 
-#W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001, .01)
-#print('Training Accuracy (Cross-Entropy-Loss)', run_model(X, Y, W))
-#print('Testing Accuracy (Cross-Entropy-Loss)', run_model(tX, tY, W))
+lambda_string = list(map(str, args.lambdas))
 
 # plot data with matplotlib
-#training_plot = plt.plot(rASE, 'b', label="Training Loss")
-#testing_plot = plt.plot(tASE, 'g', label="Testing Loss")
-#plt.xlabel('Number of Iterations')
-#plt.ylabel('Loss Value')
-#plt.legend()
-#plt.title("Training and Testing Loss vs. Iteration Count")
-#plt.show()
+training_plot = plt.plot(lambda_string, training_accuracy, 'ob--', label="Training Accuracy")
+testing_plot = plt.plot(lambda_string, testing_accuracy, 'sg--', label="Testing Accuracy")
+plt.xlabel('Labmbda Value')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.title("Training and Testing Accuracy vs. Lambdas")
+plt.show()

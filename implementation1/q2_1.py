@@ -76,6 +76,7 @@ def get_data(filename):
 parser = argparse.ArgumentParser(description='Logistic Regression for Handwritten Numeric Identification')
 parser.add_argument('training_data', help='csv file with training data')
 parser.add_argument('testing_data', help='csv file with testing data')
+parser.add_argument('learning_rate', type=float, help='a learning rate for the algorithm')
 args = parser.parse_args()
 
 # reading data from arguments
@@ -83,7 +84,7 @@ X, Y = get_data(args.training_data)
 tX, tY = get_data(args.testing_data)
 
 # running above functions and printing final loss
-W, rASE, tASE = train(X, Y, tX, tY, 300, 0.001)
+W, rASE, tASE = train(X, Y, tX, tY, 300, args.learning_rate)
 print('Training Accuracy (Cross-Entropy-Loss)', run_model(X, Y, W))
 print('Testing Accuracy (Cross-Entropy-Loss)', run_model(tX, tY, W))
 

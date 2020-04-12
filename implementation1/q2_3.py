@@ -94,8 +94,8 @@ for l in args.lambdas:
     W = train(X, Y, tX, tY, 300, 0.001, l)
     training_accuracy.append(run_model(X, Y, W))
     testing_accuracy.append(run_model(tX, tY, W))
-    # print('Train acc at lambda=', l, run_model(X, Y, W))
-    # print('Test acc at lambda=', l, run_model(tX, tY, W))
+    print('Train acc at lambda=', l, run_model(X, Y, W))
+    print('Test acc at lambda=', l, run_model(tX, tY, W))
 
 lambda_string = list(map(str, args.lambdas))
 

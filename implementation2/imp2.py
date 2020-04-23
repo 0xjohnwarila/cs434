@@ -41,6 +41,8 @@ vectorizer = CountVectorizer(
 # fit the vectorizer on the text
 vectorizer.fit(imdb_data['review'])
 
+print(vectorizer)
+
 # get the vocabulary
 inv_vocab = {v: k for k, v in vectorizer.vocabulary_.items()}
 vocabulary = [inv_vocab[i] for i in range(len(inv_vocab))]
@@ -63,16 +65,10 @@ def clean_labels(labels):
     return ret
 
 labels = clean_labels(labels)
+training_data = vectorizer.transform(imdb_data['review'][:30000])
+validation_data = vectorizer.transform(imdb_data['review'][30000:40000])
 
-# get the probability of each label
-
-pi = np.zeros(2)
-
-for label in labels:
-    pi[int(label)] += 1
-
-pi[0] /= len(labels)
-pi[1] /= len(labels)
-
-print(pi)
-
+training_labels = labels[:30000]
+validation_labels = labels[30000:]
+print(training_data.shape[0], len(training_labels))
+print(validation_data.shape[0], len(validation_labels))

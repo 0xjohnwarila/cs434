@@ -40,14 +40,12 @@ vectorizer = CountVectorizer(
 
 # fit the vectorizer on the text
 vectorizer.fit(imdb_data['review'])
+X = vectorizer.fit_transform(imdb_data['review']).toarray()
 
-print(vectorizer)
 
 # get the vocabulary
 inv_vocab = {v: k for k, v in vectorizer.vocabulary_.items()}
 vocabulary = [inv_vocab[i] for i in range(len(inv_vocab))]
-#print(vocabulary)
-print(len(vocabulary))
 
 # Get label data and clean it for use
 
@@ -70,5 +68,24 @@ validation_data = vectorizer.transform(imdb_data['review'][30000:40000])
 
 training_labels = labels[:30000]
 validation_labels = labels[30000:]
-print(training_data.shape[0], len(training_labels))
-print(validation_data.shape[0], len(validation_labels))
+
+def training(data, labels, vocabulary):
+    # Calculate prior probability for the two classes, positive and negative
+    pi = np.zeros(2)
+
+    for label in labels:
+        pi[int(label)] += 1
+
+    pi[0] /= len(labels)
+    pi[1] /= len(labels)
+
+    # Separate the classes
+    document_set = {}
+
+    for i in range(len(data)):
+        if labels[i] == 0:
+            document_set[0].append(data[i])
+        else:
+            document_set[1].append(data[i])
+
+training(training_data, training_labels, vocabulary)

@@ -1,14 +1,12 @@
+""" Multinomial Naive Bayes """
+import re
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-import re
-
-# Importing the dataset
-imdb_data = pd.read_csv('IMDB.csv', delimiter=',')
 
 
 def clean_text(text):
-
+    """Clean text of html and set to lowercase"""
     # remove HTML tags
     text = re.sub(r'<.*?>', '', text)
 
@@ -16,9 +14,6 @@ def clean_text(text):
     text = re.sub(r"\\", "", text)
     text = re.sub(r"\'", "", text)
     text = re.sub(r"\"", "", text)
-    #pattern = r'[^a-zA-z0-9\s]'
-    #text = re.sub(pattern, '', text)
-
     # convert text to lowercase
     text = text.strip().lower()
 
@@ -31,61 +26,141 @@ def clean_text(text):
     return text
 
 
-# this vectorizer will skip stop words
-vectorizer = CountVectorizer(
-    stop_words="english",
-    preprocessor=clean_text,
-    max_features=2000
-)
-
-# fit the vectorizer on the text
-vectorizer.fit(imdb_data['review'])
-X = vectorizer.fit_transform(imdb_data['review']).toarray()
-
-
-# get the vocabulary
-inv_vocab = {v: k for k, v in vectorizer.vocabulary_.items()}
-vocabulary = [inv_vocab[i] for i in range(len(inv_vocab))]
-
-# Get label data and clean it for use
-
-class_data = pd.read_csv('IMDB_labels.csv', delimiter=',')
-labels = class_data['sentiment']
-
 def clean_labels(labels):
+    """clean_labels return a list with positive label as 1 and negative as 0"""
     ret = np.zeros(len(labels))
     count = 0
     for label in labels:
         if label == 'positive':
             ret[count] = 1
-        count += 1 
-    
+        count += 1
     return ret
 
-labels = clean_labels(labels)
-training_data = vectorizer.transform(imdb_data['review'][:30000])
-validation_data = vectorizer.transform(imdb_data['review'][30000:40000])
 
-training_labels = labels[:30000]
-validation_labels = labels[30000:]
+def fit_and_transform(vocab, data):
+    """Fit transform helper"""
+    vec = CountVectorizer(
+        preprocessor=clean_text,
+        stop_words='english',
+        vocabulary=vocab,
+        max_features=2000
+    )
+    return vec.fit_transform(data)
 
-def training(data, labels, vocabulary):
+
+def training(data, labels, vocab, alpha):
+    """ Training """
+
     # Calculate prior probability for the two classes, positive and negative
-    pi = np.zeros(2)
+    priors = np.zeros(2)
 
     for label in labels:
-        pi[int(label)] += 1
+        priors[int(label)] += 1
 
-    pi[0] /= len(labels)
-    pi[1] /= len(labels)
+    priors[0] /= len(labels)
+    priors[1] /= len(labels)
 
     # Separate the classes
-    document_set = {}
+    document_set = [[], []]
 
-    for i in range(len(data)):
+    for i in range(data.shape[0]):
         if labels[i] == 0:
             document_set[0].append(data[i])
         else:
             document_set[1].append(data[i])
 
-training(training_data, training_labels, vocabulary)
+    # Laplace smoothing
+    positive = fit_and_transform(vocab, document_set[1])
+    negative = fit_and_transform(vocab, document_set[0])
+
+    positive = positive.toarray()
+    negative = negative.toarray()
+    positive_1 = np.sum(positive, axis=0)
+    negative_1 = np.sum(negative, axis=0)
+
+    positive = positive_1 + alpha
+    negative = negative_1 + alpha
+
+    ls_pos = np.sum(positive_1) + (len(vocab)*alpha)
+    ls_neg = np.sum(negative_1) + (len(vocab)*alpha)
+
+    positive = np.true_divide(positive, ls_pos)
+    negative = np.true_divide(negative, ls_neg)
+
+    return priors, positive, negative
+
+
+def predict(probs, doc):
+    """Predict returns the naive bayes prediction for a document"""
+    ret = 1
+    doc = doc.flatten()
+
+    for prob, word in zip(probs, doc):
+        ret *= prob ** word
+
+    return ret
+
+
+def validate(positive, negative, priors, data, labels):
+    """validate tests the entire set of data and labels, and prints the percent
+    correct"""
+    doc = data[0].toarray()
+    print(type(doc), doc.shape)
+    count = 0
+
+    for doc, label in zip(data, labels):
+        pos = priors[1] * predict(positive, doc.toarray())
+        neg = priors[0] * predict(negative, doc.toarray())
+
+        if pos > neg and label == 1:
+            count += 1
+        elif pos < neg and label == 0:
+            count += 1
+    print(count / len(labels))
+
+
+def run(alpha):
+    """run trains the model and validates it off the validation data"""
+    # Importing the dataset
+    imdb_data = pd.read_csv('IMDB.csv', delimiter=',')
+
+    # this vectorizer will skip stop words
+    vectorizer = CountVectorizer(
+        stop_words="english",
+        preprocessor=clean_text,
+        max_features=2000
+    )
+
+    # fit the vectorizer on the text
+    vectorizer.fit(imdb_data['review'])
+
+    # get the vocabulary
+    inv_vocab = {v: k for k, v in vectorizer.vocabulary_.items()}
+    vocabulary = [inv_vocab[i] for i in range(len(inv_vocab))]
+
+    # Get label data and clean it for use
+
+    class_data = pd.read_csv('IMDB_labels.csv', delimiter=',')
+    labels = class_data['sentiment']
+
+    labels = clean_labels(labels)
+    training_data = imdb_data['review'][:30000]
+    validation_data = imdb_data['review'][30000:40000]
+
+    training_labels = labels[:30000]
+    validation_labels = labels[30000:]
+    priors, positive, negative = training(
+        training_data,
+        training_labels,
+        vocabulary,
+        alpha
+    )
+
+    validate(
+        positive, negative, priors,
+        vectorizer.transform(validation_data),
+        validation_labels
+    )
+
+
+run(1)

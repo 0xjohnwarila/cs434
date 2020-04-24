@@ -90,7 +90,7 @@ def predict(probs, doc):
     return ret
 
 
-def validate(positive, negative, priors, data, labels):
+def validate(positive, negative, priors, data, labels, run):
     """validate tests the entire set of data and labels, and prints the percent
     correct"""
     doc = data[0].toarray()
@@ -104,10 +104,10 @@ def validate(positive, negative, priors, data, labels):
             count += 1
         elif pos < neg and label == 0:
             count += 1
-    print(count / len(labels))
+    print(run, 100 * (count / len(labels)))
 
 
-def run(alpha):
+def run():
     """run trains the model and validates it off the validation data"""
     # Importing the dataset
     imdb_data = pd.read_csv('IMDB.csv', delimiter=',')
@@ -137,6 +137,31 @@ def run(alpha):
 
     training_labels = labels[:30000]
     validation_labels = labels[30000:]
+
+    """
+    alphas = np.arange(0, 2.2, .2)
+    for alpha in alphas:
+        priors, positive, negative = training(
+            training_data,
+            training_labels,
+            vocabulary,
+            alpha,
+            vectorizer
+        )
+
+        validate(
+            positive, negative, priors,
+            vectorizer.transform(validation_data),
+            validation_labels
+        )
+
+        validate(
+            positive, negative, priors,
+            vectorizer.transform(training_data),
+            training_labels
+        )
+    """
+    alpha = 1
     priors, positive, negative = training(
         training_data,
         training_labels,
@@ -144,12 +169,18 @@ def run(alpha):
         alpha,
         vectorizer
     )
-
     validate(
         positive, negative, priors,
         vectorizer.transform(validation_data),
-        validation_labels
+        validation_labels,
+        'validation'
+    )
+    validate(
+        positive, negative, priors,
+        vectorizer.transform(training_data),
+        training_labels,
+        'training'
     )
 
 
-run(1)
+run()

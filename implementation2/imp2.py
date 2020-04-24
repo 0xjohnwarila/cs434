@@ -37,18 +37,7 @@ def clean_labels(labels):
     return ret
 
 
-def fit_and_transform(vocab, data):
-    """Fit transform helper"""
-    vec = CountVectorizer(
-        preprocessor=clean_text,
-        stop_words='english',
-        vocabulary=vocab,
-        max_features=2000
-    )
-    return vec.fit_transform(data)
-
-
-def training(data, labels, vocab, alpha):
+def training(data, labels, vocab, alpha, vec):
     """ Training """
 
     # Calculate prior probability for the two classes, positive and negative
@@ -70,8 +59,8 @@ def training(data, labels, vocab, alpha):
             document_set[1].append(data[i])
 
     # Laplace smoothing
-    positive = fit_and_transform(vocab, document_set[1])
-    negative = fit_and_transform(vocab, document_set[0])
+    positive = vec.transform(document_set[1])
+    negative = vec.transform(document_set[0])
 
     positive = positive.toarray()
     negative = negative.toarray()
@@ -105,7 +94,6 @@ def validate(positive, negative, priors, data, labels):
     """validate tests the entire set of data and labels, and prints the percent
     correct"""
     doc = data[0].toarray()
-    print(type(doc), doc.shape)
     count = 0
 
     for doc, label in zip(data, labels):
@@ -153,7 +141,8 @@ def run(alpha):
         training_data,
         training_labels,
         vocabulary,
-        alpha
+        alpha,
+        vectorizer
     )
 
     validate(

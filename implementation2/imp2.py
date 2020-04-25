@@ -1,5 +1,6 @@
 """ Multinomial Naive Bayes """
 import re
+import argparse
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
@@ -107,16 +108,18 @@ def validate(positive, negative, priors, data, labels, run):
     print(run, 100 * (count / len(labels)))
 
 
-def run():
+def run(data, labels, alpha, max_features, max_df, min_df):
     """run trains the model and validates it off the validation data"""
     # Importing the dataset
-    imdb_data = pd.read_csv('IMDB.csv', delimiter=',')
+    imdb_data = pd.read_csv(data, delimiter=',')
 
     # this vectorizer will skip stop words
     vectorizer = CountVectorizer(
         stop_words="english",
         preprocessor=clean_text,
-        max_features=2000
+        max_features=max_features,
+        max_df=max_df,
+        min_df=min_df
     )
 
     # fit the vectorizer on the text
@@ -128,7 +131,7 @@ def run():
 
     # Get label data and clean it for use
 
-    class_data = pd.read_csv('IMDB_labels.csv', delimiter=',')
+    class_data = pd.read_csv(labels, delimiter=',')
     labels = class_data['sentiment']
 
     labels = clean_labels(labels)
@@ -138,30 +141,6 @@ def run():
     training_labels = labels[:30000]
     validation_labels = labels[30000:]
 
-    """
-    alphas = np.arange(0, 2.2, .2)
-    for alpha in alphas:
-        priors, positive, negative = training(
-            training_data,
-            training_labels,
-            vocabulary,
-            alpha,
-            vectorizer
-        )
-
-        validate(
-            positive, negative, priors,
-            vectorizer.transform(validation_data),
-            validation_labels
-        )
-
-        validate(
-            positive, negative, priors,
-            vectorizer.transform(training_data),
-            training_labels
-        )
-    """
-    alpha = 1
     priors, positive, negative = training(
         training_data,
         training_labels,
@@ -182,5 +161,59 @@ def run():
         'training'
     )
 
+PARSER = argparse.ArgumentParser(description='Multinomial Naive Bayes')
+PARSER.add_argument('data', help='csv file with reviews')
+PARSER.add_argument('labels', help='csv file with labels for data')
+PARSER.add_argument('alpha', type=float, help='alpha value for laplace smoothing')
+PARSER.add_argument('max_features', type=int, help='Maximum features for BOW')
+PARSER.add_argument('max_df', type=float, help='max_df for BOW (float form)')
+PARSER.add_argument('min_df', type=float, help='min_df for BOW (float form)')
 
-run()
+# BEST parameters right now: Alpha = 1, max_features=368, max_df=0.34,
+# min_df=0.037
+args = PARSER.parse_args()
+run(args.data, args.labels, args.alpha, args.max_features, args.max_df,
+        args.min_df)
+
+max_dfs = np.arange(.3, 0.4, 0.01)
+min_dfs = np.arange(0.02, 0.05, 0.001)
+alphas = np.arange(0, 5, 0.2)
+
+"""
+for alpha in alphas:
+    print("----- RUNNING WITH alpha =", alpha, "-----") 
+    print("-")
+    run(args.data, args.labels, alpha, args.max_features, args.max_df, 
+        args.min_df)
+    print("-")
+"""
+
+"""
+for max_df in max_dfs:
+    print("----- RUNNING WITH max_df =", max_df, "-----")
+    print("-")
+    run(args.data, args.labels, args.alpha, args.max_features, max_df,
+            args.min_df)
+    print("-")
+"""
+
+"""
+for min_df in min_dfs:
+    print("----- RUNNING WITH min_df =", min_df, "-----")
+    print("-")
+    run(args.data, args.labels, args.alpha, args.max_features, args.max_df,
+            min_df)
+    print("-")
+"""
+
+"""
+max_features_list = np.arange(366, 376, 1)
+
+for max_features in max_features_list:
+    print("----- RUNNING WITH max_features =", max_features, "-----")
+    print("-")
+    run(args.data, args.labels, args.alpha, max_features, args.max_df,
+            args.min_df)
+    print("-")
+"""
+

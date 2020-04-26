@@ -12,13 +12,13 @@ python3 imp2.py \<data file\> \<labels file\> \<run_type\>
 
 The data and labels file should be two separate csv files.
 
-!!Important note!!
+**Important note**
 
 When running testing data make sure to provide the full 50k labels and data!
 There will be index out of bounds if you do not. For training and validation,
 have the full 50k data, and 40k labels.
 
-Options for run_type argument
+### Options for run_type argument
 
 - validate_default , this runs the default settings and outputs the validation and training data. Predictions are saved in a temp training_validation.csv file
 - validate_best , this runs the best settings and outputs teh validation and training data. Predictions are saved in a temp training_validation.csv file
@@ -27,7 +27,7 @@ Options for run_type argument
 - test_best , this runs the best settings on the test data. Predictions go to test-predictions3.csv
 - cust , this runs a custom run. The optional arguments will be used. If none are provided this is the same as running validate_default.
 
-Optional argumnents
+### Optional argumnents
 
 - \-\-alpha , this sets the alpha for laplace smoothing. Should be an int
 - \-\-max_features , this sets the maximum features for the CountVectorizer

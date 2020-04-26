@@ -106,6 +106,8 @@ def validate(probs, priors, data, labels, tag):
     # Format document for use
     doc = data[0].toarray()
     count = 0
+    predictions = np.zeros(len(labels))
+    itr = 0
 
     for doc, label in zip(data, labels):
         pos = priors[1] * predict(probs[1], doc.toarray().flatten())
@@ -115,6 +117,19 @@ def validate(probs, priors, data, labels, tag):
             count += 1
         elif pos < neg and label == 0:
             count += 1
+        if pos > neg:
+            predictions[itr] = 1
+        itr += 1
+    data_out = pd.DataFrame(predictions, columns=['prediction'])
+    if tag == "test-default":
+        data_out.to_csv("test-prediction1.csv")
+    elif tag == "test-alpha":
+        data_out.to_csv("test-prediction2.csv")
+    elif tag == "test-best":
+        data_out.to_csv("test-prediction3.csv")
+    else:
+        data_out.to_csv("training_validation.csv")
+
     print(tag, 100 * (count / len(labels)))
 
 
@@ -177,7 +192,7 @@ def run(data, labels, alpha, max_features, max_df, min_df):
     )
 
 
-def run_test(data, labels, alpha, max_features, max_df, min_df):
+def run_test(data, labels, alpha, max_features, max_df, min_df, tag):
     """run_test runs the algorithm on the testing data"""
     imdb_data = pd.read_csv(data, delimiter=',')
 
@@ -217,7 +232,7 @@ def run_test(data, labels, alpha, max_features, max_df, min_df):
         priors,
         vectorizer.transform(testing_data),
         testing_labels,
-        'testing'
+        tag
     )
 
 
@@ -254,10 +269,13 @@ elif ARGS.run_type == "validate_best":
     run(ARGS.data, ARGS.labels, 1, 368, 0.34, 0.037)
 elif ARGS.run_type == "test_default":
     print("Make sure all 50k labels are in the labels file")
-    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1)
+    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1, "test_default")
+elif ARGS.run_type == "test_alpha":
+    print("Make sure all 50k labels are in the labels file")
+    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1, "test_alpha")
 elif ARGS.run_type == "test_best":
     print("Make sure all 50k labels are in the labels file")
-    run_test(ARGS.data, ARGS.labels, 1, 2000, 0.34, 0.037)
+    run_test(ARGS.data, ARGS.labels, 1, 2000, 0.34, 0.037, "test_best")
 elif ARGS.run_type == "cust":
     print("Custom run, training and validation only")
     run(ARGS.data, ARGS.labels, ARGS.alpha, ARGS.max_features, ARGS.max_df,

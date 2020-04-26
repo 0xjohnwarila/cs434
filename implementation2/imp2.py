@@ -269,8 +269,7 @@ alphas = np.arange(0, 2, 0.2)
 for alpha in alphas:
     print("----- RUNNING WITH alpha =", alpha, "-----") 
     print("-")
-    run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
-        ARGS.min_df)
+    run(ARGS.data, ARGS.labels, alpha, 2000, 1.0, 1)
     print("-")
 
 exit()
@@ -315,7 +314,7 @@ alphas = np.arange(0, 5, 0.2)
 #     run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
 #         ARGS.min_df)
 #     print("-")
- """
+"""
 for max_df in max_dfs:
     print("----- RUNNING WITH max_df =", max_df, "-----")
     print("-")

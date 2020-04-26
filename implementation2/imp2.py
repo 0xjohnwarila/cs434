@@ -266,7 +266,7 @@ ARGS = PARSER.parse_args()
 
 # Switch on the run_type
 if ARGS.run_type == "validate_default":
-    run(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1)
+    run(ARGS.data, ARGS.labels, 2, 2000, 1.0, 1)
 elif ARGS.run_type == "validate_best":
     run(ARGS.data, ARGS.labels, 1, 368, 0.34, 0.037)
 elif ARGS.run_type == "test_default":

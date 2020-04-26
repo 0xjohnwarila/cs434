@@ -173,6 +173,15 @@ def run(data, labels, alpha, max_features, max_df, min_df):
         vectorizer
     )
 
+    # Training run
+    validate(
+        probs,
+        priors,
+        vectorizer.transform(training_data),
+        training_labels,
+        'training'
+    )
+
     # Validation run
     validate(
         probs,
@@ -182,14 +191,7 @@ def run(data, labels, alpha, max_features, max_df, min_df):
         'validation'
     )
 
-    # Training run
-    validate(
-        probs,
-        priors,
-        vectorizer.transform(training_data),
-        training_labels,
-        'training'
-    )
+    
 
 
 def run_test(data, labels, alpha, max_features, max_df, min_df, tag):

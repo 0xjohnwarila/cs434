@@ -264,6 +264,17 @@ PARSER.add_argument('--min_df', default=1,
 # min_df=0.037
 ARGS = PARSER.parse_args()
 
+alphas = np.arange(0, 2, 0.2)
+
+for alpha in alphas:
+    print("----- RUNNING WITH alpha =", alpha, "-----") 
+    print("-")
+    run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
+        ARGS.min_df)
+    print("-")
+
+exit()
+
 # Switch on the run_type
 if ARGS.run_type == "validate_default":
     run(ARGS.data, ARGS.labels, 2, 2000, 1.0, 1)
@@ -295,15 +306,15 @@ min_dfs = np.arange(0.02, 0.05, 0.001)
 alphas = np.arange(0, 5, 0.2)
 """
 
-alphas = np.arange(0, 2, 0.2)
+# alphas = np.arange(0, 2, 0.2)
 
 
-for alpha in alphas:
-    print("----- RUNNING WITH alpha =", alpha, "-----") 
-    print("-")
-    run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
-        ARGS.min_df)
-    print("-")
+# for alpha in alphas:
+#     print("----- RUNNING WITH alpha =", alpha, "-----") 
+#     print("-")
+#     run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
+#         ARGS.min_df)
+#     print("-")
  """
 for max_df in max_dfs:
     print("----- RUNNING WITH max_df =", max_df, "-----")

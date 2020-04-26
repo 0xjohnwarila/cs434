@@ -120,15 +120,15 @@ def validate(probs, priors, data, labels, tag):
         if pos > neg:
             predictions[itr] = 1
         itr += 1
-    data_out = pd.DataFrame(predictions, columns=['prediction'])
+    data_out = pd.DataFrame(predictions)
     if tag == "test-default":
-        data_out.to_csv("test-prediction1.csv")
+        data_out.to_csv("test-prediction1.csv", header=None, index=None)
     elif tag == "test-alpha":
-        data_out.to_csv("test-prediction2.csv")
+        data_out.to_csv("test-prediction2.csv", header=None, index=None)
     elif tag == "test-best":
-        data_out.to_csv("test-prediction3.csv")
+        data_out.to_csv("test-prediction3.csv", header=None, index=None)
     else:
-        data_out.to_csv("training_validation.csv")
+        data_out.to_csv("training_validation.csv", header=None, index=None)
 
     print(tag, 100 * (count / len(labels)))
 

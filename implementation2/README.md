@@ -33,3 +33,8 @@ have the full 50k data, and 40k labels.
 - \-\-max_features , this sets the maximum features for the CountVectorizer
 - \-\-max_df , this sets the maximum document frequency for the CountVectorizer
 - \-\-min_df , this sets the minimum document frequency for the CountVectorizer
+
+### Output format
+In the command line the program will output the run_type and the accuracy.
+
+In the output csv file there will be a single column of predictions. 1.0 is positive, 0.0 is negative

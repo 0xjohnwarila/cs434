@@ -8,7 +8,7 @@ Joshua Barringer, barrinjo - Algorithm design and Implementation
 Make sure to use python3 to run.
 
 Required arguments
-python3 imp2.py <data file> <labels file> <run_type>
+python3 imp2.py \<data file\> \<labels file\> \<run_type\>
 
 The data and labels file should be two separate csv files.
 

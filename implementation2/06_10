@@ -1,0 +1,10 @@
+----- RUNNING WITH alpha = 0.6 -----
+-
+training 70.27
+validation 69.5
+-
+----- RUNNING WITH alpha = 0.8 -----
+-
+training 70.27
+validation 69.5
+-

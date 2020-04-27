@@ -14,9 +14,8 @@ The data and labels file should be two separate csv files.
 
 **Important note**
 
-When running testing data make sure to provide the full 50k labels and data!
-There will be index out of bounds if you do not. For training and validation,
-have the full 50k data, and 40k labels.
+If you want to run the test predictions and give the program the full 50k labels, make sure to go into the source code and uncomment the lines in 
+the function validate_test near line 129. The lines in question have comments near them.
 
 ### Options for run_type argument
 

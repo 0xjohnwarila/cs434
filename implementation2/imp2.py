@@ -1,5 +1,6 @@
 """ Multinomial Naive Bayes """
 import re
+import math
 import argparse
 import numpy as np
 import pandas as pd
@@ -93,18 +94,42 @@ def predict(probs, doc):
     # For every word in the document, find the product of the probabilities,
     # raised by the frequency of the word
     for prob, word in zip(probs, doc):
-        ret *= prob ** word
+        ret += math.log(prob ** word)
 
     # Return the total probability of the document's words being in the class
     return ret
+
+def validate_test(probs, priors, data, tag):
+    """validate_test makes the predictions over the last 10K data points and
+    stores them in a csv file.
+    """
+
+    # Format documents for use
+    count = 0
+    predictions = np.zeros(data.shape[0])
+    itr = 0
+
+    for doc in data:
+        pos = priors[1] * predict(probs[1], doc.toarray().flatten())
+        neg = priors[0] * predict(probs[0], doc.toarray().flatten())
+
+        if pos > neg:
+            predictions[itr] = 1
+        itr += 1
+    
+    data_out = pd.DataFrame(predictions)
+    if tag == "test-default":
+        data_out.to_csv("test-prediction1.csv", header=None, index=None)
+    elif tag == "test-alpha":
+        data_out.to_csv("test-prediction2.csv", header=None, index=None)
+    elif tag == "test-best":
+        data_out.to_csv("test-prediction3.csv", header=None, index=None) 
 
 
 def validate(probs, priors, data, labels, tag):
     """validate tests the entire set of data and labels, and prints the percent
     correct"""
 
-    # Format document for use
-    doc = data[0].toarray()
     count = 0
     predictions = np.zeros(len(labels))
     itr = 0
@@ -130,6 +155,7 @@ def validate(probs, priors, data, labels, tag):
     else:
         data_out.to_csv("training_validation.csv", header=None, index=None)
 
+    print(count, "correct")
     print(tag, 100 * (count / len(labels)))
 
 
@@ -137,6 +163,10 @@ def run(data, labels, alpha, max_features, max_df, min_df):
     """run trains the model and validates it off the validation data"""
     # Importing the dataset
     imdb_data = pd.read_csv(data, delimiter=',')
+    print("max feat:", max_features)
+    print("max_df:", max_df)
+    print("min_df:", min_df)
+    print("alpha:", alpha)
 
     # this vectorizer will skip stop words
     vectorizer = CountVectorizer(
@@ -153,6 +183,8 @@ def run(data, labels, alpha, max_features, max_df, min_df):
     # get the vocabulary
     vocabulary = {v: k for k, v in vectorizer.vocabulary_.items()}
     vocabulary = [vocabulary[i] for i in range(len(vocabulary))]
+
+    print(len(vocabulary), "words in vocab")
 
     training_data = imdb_data['review'][:30000]
     validation_data = imdb_data['review'][30000:40000]
@@ -197,6 +229,7 @@ def run(data, labels, alpha, max_features, max_df, min_df):
 def run_test(data, labels, alpha, max_features, max_df, min_df, tag):
     """run_test runs the algorithm on the testing data"""
     imdb_data = pd.read_csv(data, delimiter=',')
+    
 
     vectorizer = CountVectorizer(
         stop_words='english',
@@ -217,7 +250,9 @@ def run_test(data, labels, alpha, max_features, max_df, min_df, tag):
     # get labels
     labels = clean_labels(pd.read_csv(labels, delimiter=',')['sentiment'])
     training_labels = labels[:30000]
-    testing_labels = labels[40000:]
+    
+    # Uncomment the below line if running with testing labels
+    # testing_labels = labels[40000:]
 
     # Train
     priors, probs = training(
@@ -229,6 +264,17 @@ def run_test(data, labels, alpha, max_features, max_df, min_df, tag):
     )
 
     # Run testing data
+    validate_test(
+        probs,
+        priors,
+        vectorizer.transform(testing_data),
+        tag
+    )
+
+    # Uncomment the below validate() call to run with the testing labels.
+    # Make sure to comment the above validate_test() out.
+
+    """
     validate(
         probs,
         priors,
@@ -236,6 +282,7 @@ def run_test(data, labels, alpha, max_features, max_df, min_df, tag):
         testing_labels,
         tag
     )
+    """
 
 
 # Arguments parsing
@@ -264,34 +311,17 @@ PARSER.add_argument('--min_df', default=1,
 # min_df=0.037
 ARGS = PARSER.parse_args()
 
-alphas = np.arange(ARGS.max_df, ARGS.min_df, 0.2)
-
-for alpha in alphas:
-    print("----- RUNNING WITH alpha =", alpha, "-----") 
-    print("-")
-    run(ARGS.data, ARGS.labels, alpha, 2000, 1.0, 1)
-    print("-")
-
-exit()
-
 # Switch on the run_type
 if ARGS.run_type == "validate_default":
     run(ARGS.data, ARGS.labels, 2, 2000, 1.0, 1)
 elif ARGS.run_type == "validate_best":
-    run(ARGS.data, ARGS.labels, 1, 368, 0.34, 0.037)
+    run(ARGS.data, ARGS.labels, .8, 40000, 0.42, 0.0)
 elif ARGS.run_type == "test_default":
-    print("Make sure all 50k labels are in the labels file")
-    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1, "test_default")
+    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1, "test-default")
 elif ARGS.run_type == "test_alpha":
-    print("Make sure all 50k labels are in the labels file")
-    run_test(ARGS.data, ARGS.labels, 1, 2000, 1.0, 1, "test_alpha")
+    run_test(ARGS.data, ARGS.labels, .8, 2000, 1.0, 1, "test-alpha")
 elif ARGS.run_type == "test_best":
-    print("Make sure all 50k labels are in the labels file")
-    run_test(ARGS.data, ARGS.labels, 1, 2000, 0.34, 0.037, "test_best")
-elif ARGS.run_type == "cust":
-    print("Custom run, training and validation only")
-    run(ARGS.data, ARGS.labels, ARGS.alpha, ARGS.max_features, ARGS.max_df,
-        ARGS.min_df)
+    run_test(ARGS.data, ARGS.labels, .8, 40000, 0.42, 0.0, "test-best")
 else:
     print("Unknown runtype, please use on of these:")
     print("validate_default, validate_best, test_default, test_best")
@@ -308,12 +338,7 @@ alphas = np.arange(0, 5, 0.2)
 # alphas = np.arange(0, 2, 0.2)
 
 
-# for alpha in alphas:
-#     print("----- RUNNING WITH alpha =", alpha, "-----") 
-#     print("-")
-#     run(ARGS.data, ARGS.labels, alpha, ARGS.max_features, ARGS.max_df, 
-#         ARGS.min_df)
-#     print("-")
+
 
 """
 for max_df in max_dfs:

@@ -5,7 +5,7 @@ Joshua Barringer, barrinjo - Algorithm design and Implementation
 
 ## Running instructions
 
-Make sure to use python3 to run.
+Make sure to use python3 to run. Required packages are numpy, pandas, and sklearn
 
 Required arguments
 python3 imp2.py \<data file\> \<labels file\> \<run_type\>

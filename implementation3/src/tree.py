@@ -27,12 +27,14 @@ class Node():
 
 class DecisionTreeClassifier():
     """
-    Decision Tree Classifier. Class for building the decision tree and making predictions
+    Decision Tree Classifier. Class for building the decision tree and making
+    predictions
 
     Parameters:
     ------------
     max_depth: int
-        The maximum depth to build the tree. Root is at depth 0, a single split makes depth 1 (decision stump)
+        The maximum depth to build the tree. Root is at depth 0, a single split
+        makes depth 1 (decision stump)
     """
 
     def __init__(self, max_depth=None):
@@ -118,35 +120,43 @@ class DecisionTreeClassifier():
         # if we did hit a leaf node
         return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=None, right_tree=None)
 
-
-    # gets data corresponding to a split by using numpy indexing
     def check_split(self, X, y, feature, split):
+        '''
+        check_split gets data corresponding to a split by using numpy indexing
+        '''
         left_idx = np.where(X[:, feature] < split)
         right_idx = np.where(X[:, feature] >= split)
-        left_X = X[left_idx]
-        right_X = X[right_idx]
+        left_x = X[left_idx]
+        right_x = X[right_idx]
         left_y = y[left_idx]
         right_y = y[right_idx]
 
         # calculate gini impurity and gain for y, left_y, right_y
         gain = self.calculate_gini_gain(y, left_y, right_y)
-        return gain, left_X, right_X, left_y, right_y
+        return gain, left_x, right_x, left_y, right_y
 
     def calculate_gini_gain(self, y, left_y, right_y):
         # not a leaf node
         # calculate gini impurity and gain
         gain = 0
         if len(left_y) > 0 and len(right_y) > 0:
-
-            ########################################
-            #       YOUR CODE GOES HERE            #
-            ########################################
-
+            c_pos = sum(y)
+            c_neg = len(y) - c_pos
+            cl_pos = np.sum(left_y)
+            cl_neg = len(left_y) - cl_pos
+            cr_pos = np.sum(right_y)
+            cr_neg = len(right_y) - cr_pos
+            p_l = len(left_y) / len(y)
+            p_r = len(right_y) / len(y)
+            g_c = 1 - ((c_pos / len(y))**2) - ((c_neg / len(y))**2)
+            g_l = 1 - ((cl_pos / len(left_y))**2) - ((cl_neg / len(left_y))**2)
+            g_r = 1 - ((cr_pos / len(right_y))**2) - ((cr_neg /
+                                                       len(right_y))**2)
+            gain = g_c - p_l * g_l - p_r * g_r
             return gain
         # we hit leaf node
         # don't have any gain, and don't want to divide by 0
-        else:
-            return 0
+        return 0
 
 class RandomForestClassifier():
     """

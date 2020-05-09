@@ -158,12 +158,14 @@ class DecisionTreeClassifier():
         # don't have any gain, and don't want to divide by 0
         return 0
 
+
 class RandomForestClassifier():
     """
     Random Forest Classifier. Build a forest of decision trees.
     Use this forest for ensemble predictions
 
-    YOU WILL NEED TO MODIFY THE DECISION TREE VERY SLIGHTLY TO HANDLE FEATURE BAGGING
+    YOU WILL NEED TO MODIFY THE DECISION TREE VERY SLIGHTLY TO HANDLE FEATURE
+    BAGGING
 
     Parameters:
     -----------
@@ -183,8 +185,10 @@ class RandomForestClassifier():
         # YOUR CODE HERE #
         ##################
 
-    # fit all trees
     def fit(self, X, y):
+        '''
+        fit all trees
+        '''
         bagged_X, bagged_y = self.bag_data(X, y)
         print('Fitting Random Forest...\n')
         for i in range(self.n_trees):
@@ -195,6 +199,9 @@ class RandomForestClassifier():
         print()
 
     def bag_data(self, X, y, proportion=1.0):
+        '''
+        bag_data helper
+        '''
         bagged_X = []
         bagged_y = []
         for i in range(self.n_trees):
@@ -208,6 +215,9 @@ class RandomForestClassifier():
 
 
     def predict(self, X):
+        '''
+        predict
+        '''
         preds = []
 
         # remove this one \/

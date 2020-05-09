@@ -2,12 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set()
 
 import argparse
-
 from utils import load_data, f1, accuracy_score, load_dictionary, dictionary_info
 from tree import DecisionTreeClassifier, RandomForestClassifier
+sns.set()
 
 def load_args():
 
@@ -28,7 +27,7 @@ def county_info(_args):
 
 def decision_tree_testing(x_train, y_train, x_test, y_test):
     print('Decision Tree\n\n')
-    clf = DecisionTreeClassifier(max_depth=20)
+    clf = DecisionTreeClassifier(max_depth=2)
     clf.fit(x_train, y_train)
     preds_train = clf.predict(x_train)
     preds_test = clf.predict(x_test)
@@ -38,6 +37,66 @@ def decision_tree_testing(x_train, y_train, x_test, y_test):
     print('Test {}'.format(test_accuracy))
     preds = clf.predict(x_test)
     print('F1 Test {}'.format(f1(y_test, preds)))
+
+def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
+    print("Varying depths, decision tree")
+
+    training_acc = np.zeros(end+1 - start)
+    testing_acc = np.zeros(end+1 - start)
+    f1_acc = np.zeros(end+1 - start)
+    best_test = 0
+    best_test_d = 0
+    best_f1 = 0
+    best_f1_d = 0
+    best_gain = 0
+    for depth in range(start, end+1):
+        clf = DecisionTreeClassifier(max_depth=depth)
+        clf.fit(x_train, y_train)
+        preds_train = clf.predict(x_train)
+        preds_test = clf.predict(x_test)
+        train_accuracy = accuracy_score(preds_train, y_train)
+        training_acc[depth-1] = train_accuracy
+        test_accuracy = accuracy_score(preds_test, y_test)
+        if test_accuracy > best_test:
+            best_test = test_accuracy
+            best_test_d = depth
+        testing_acc[depth-1] = test_accuracy
+        f1_accuracy = f1(y_test, preds_test)
+        if f1_accuracy > best_f1:
+            best_f1 = f1_accuracy
+            best_f1_d = depth
+        f1_acc[depth-1] = f1_accuracy
+        if clf.get_best_gain() > best_gain:
+            best_gain = clf.get_best_gain()
+
+    print("Best test accuracy is", best_test, "at depth", best_test_d)
+    print("Best F1 accuracy is", best_f1, "at depth", best_f1_d)
+    print("Best gain", best_gain)
+    plt.axvline(x=best_f1_d, linestyle='dashed')
+
+    # Plotting
+    df = pd.DataFrame({
+        'x': range(start, end+1),
+        'train': training_acc,
+        'test': testing_acc,
+        'f1': f1_acc
+        })
+
+    plt.style.use('seaborn-darkgrid')
+
+    palette = plt.get_cmap('Set1')
+
+    num = 0
+
+    for column in df.drop('x', axis=1):
+        num += 1
+        plt.plot(df['x'], df[column], marker='', color=palette(num),
+                 linewidth=1, alpha=0.9, label=column)
+    plt.legend(loc=2, ncol=2)
+    plt.title("Accuracy at Varying Decision Tree Depths")
+    plt.xlabel("Depth")
+    plt.ylabel("Accuracy")
+    plt.show()
 
 def random_forest_testing(x_train, y_train, x_test, y_test):
     print('Random Forest\n\n')
@@ -62,7 +121,8 @@ if __name__ == '__main__':
     if args.county_dict == 1:
         county_info(args)
     if args.decision_tree == 1:
-        decision_tree_testing(x_train, y_train, x_test, y_test)
+        # decision_tree_testing(x_train, y_train, x_test, y_test)
+        varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
         random_forest_testing(x_train, y_train, x_test, y_test)
 

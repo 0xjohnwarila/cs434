@@ -155,7 +155,7 @@ if __name__ == '__main__':
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
         #random_forest_testing(x_train, y_train, x_test, y_test)
-        random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 1000, 1020)
+        random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
 
     print('Done')
 

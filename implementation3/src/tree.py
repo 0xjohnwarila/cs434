@@ -204,13 +204,29 @@ class RandomForestClassifier():
         '''
         bag_data helper
         '''
+        # Array of each tree's X data
+        #   First index: tree index
+        #   Second index: 2098 rows of randomly sampled data (repeats allowed)
+        #   Third index: randomly sampled features on data (no repeats)
         bagged_X = []
+        # array of prediction tags that match X data
+        #   first index: tree index
+        #   second index: 2098 randomly sampled tags that match X data sampling
         bagged_y = []
         for i in range(self.n_trees):
-            feature_idx = np.random.choice(len(X), self.max_features,
-                                           replace=False)
-            temp_X = [X[j] for j in feature_idx]
-            temp_y = [y[j] for j in feature_idx]
+            # randomly sample indices of range of data (duplicates allowed)
+            sampled_data = np.random.choice(len(X), 2098, replace=True)
+
+            # use same index sampling to create matching data and tags
+            temp_X = [X[j] for j in sampled_data]
+            temp_y = [y[j] for j in sampled_data]
+
+            # randomly sample 11 column indices for feature sampling over X data (no duplicates)
+            sampled_features = np.random.choice(len(X[0]), self.max_features, replace = False)
+
+            # narrow array to selected features
+            temp_X = [temp_X[:][j] for j in sampled_features]
+
             bagged_X.append(temp_X)
             bagged_y.append(temp_y)
 

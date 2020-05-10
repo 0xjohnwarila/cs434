@@ -267,15 +267,19 @@ class AdaDecisionTreeClassifier():
         makes depth 1 (decision stump)
     """
 
-    def __init__(self, max_depth=None):
-        self.max_depth = max_depth
-        self.max_features = max_features
+    def __init__(self):
+        self.max_depth = 1
+        self.num_classes = 0
+        self.root = None
 
     # take in features X and labels y
     # build a tree
-    def fit(self, X, y):
+    def fit(self, X, y, weights):
+        '''
+        fit a stump with the weights
+        '''
         self.num_classes = len(set(y))
-        self.root = self.build_tree(X, y, depth=1)
+        self.root = self.build_tree(X, y, depth=1, weights)
 
     # make prediction for each example of features X
     def predict(self, X):
@@ -301,7 +305,7 @@ class AdaDecisionTreeClassifier():
         return accuracy
 
     # function to build a decision tree
-    def build_tree(self, X, y, depth):
+    def build_tree(self, X, y, depth, weights):
         num_samples, num_features = X.shape
         # which features we are considering for splitting on
         self.features_idx = np.arange(0, X.shape[1])
@@ -330,7 +334,7 @@ class AdaDecisionTreeClassifier():
                 for split in possible_splits:
                     # get the gain and the data on each side of the split
                     # >= split goes on right, < goes on left
-                    gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split)
+                    gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split, weights)
                     # if we have a better gain, use this split and keep track of data
                     if gain > best_gain:
                         best_gain = gain
@@ -351,7 +355,7 @@ class AdaDecisionTreeClassifier():
         # if we did hit a leaf node
         return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=None, right_tree=None)
 
-    def check_split(self, X, y, feature, split):
+    def check_split(self, X, y, feature, split, weights):
         '''
         check_split gets data corresponding to a split by using numpy indexing
         '''
@@ -366,7 +370,7 @@ class AdaDecisionTreeClassifier():
         gain = self.calculate_gini_gain(y, left_y, right_y)
         return gain, left_x, right_x, left_y, right_y
 
-    def calculate_gini_gain(self, y, left_y, right_y):
+    def calculate_gini_gain(self, y, left_y, right_y, weights):
         # not a leaf node
         # calculate gini impurity and gain
         gain = 0
@@ -394,5 +398,18 @@ class AdaDecisionTreeClassifier():
 # MUST MODIFY THIS EXISTING DECISION TREE CODE #
 ################################################
 class AdaBoostClassifier():
-    def __init__(self):
-        pass
+    def __init__(self, L):
+        self.number_of_trees = L
+
+    def fit(self, x, y):
+        d = [1/x.shape[0] for n in range(x.shape[0])]
+        for t in range(self.number_of_trees):
+            tree = AdaDecisionTreeClassifier()
+            tree.fit(x, y, d)
+            e = self.error(tree, x, y, d)
+
+            alpha = self.alpha(e)
+            d_t = self.update_weights(e, alpha, tree, x, y)
+            d = self.normalize(d_t)
+
+

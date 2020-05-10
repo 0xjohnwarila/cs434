@@ -5,7 +5,7 @@ import seaborn as sns
 
 import argparse
 from utils import load_data, f1, accuracy_score, load_dictionary, dictionary_info
-from tree import DecisionTreeClassifier, RandomForestClassifier
+from tree import DecisionTreeClassifier, RandomForestClassifier, AdaBoostClassifier
 sns.set()
 
 def load_args():
@@ -216,6 +216,10 @@ def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
     plt.ylabel("Accuracy")
     plt.show()
 
+def ada_boost_testing(x_train, y_train, x_test, y_test, L=1):
+    classifier = AdaBoostClassifier(L)
+    classifier.fit(x_train, y_train)
+
 
 ###################################################
 # Modify for running your experiments accordingly #
@@ -232,5 +236,7 @@ if __name__ == '__main__':
         random_forest_testing_optimal_params(x_train, y_train, x_test, y_test)
         # random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
         # random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
+    if args.ada_boost == 1:
+        ada_boost_testing(x_train, y_train, x_test, y_test)
 
     print('Done')

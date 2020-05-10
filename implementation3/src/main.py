@@ -48,7 +48,6 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
     best_test_d = 0
     best_f1 = 0
     best_f1_d = 0
-    best_gain = 0
     for depth in range(start, end+1):
         clf = DecisionTreeClassifier(max_depth=depth)
         clf.fit(x_train, y_train)
@@ -107,6 +106,41 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
     preds = rclf.predict(x_test)
     print('F1 Test {}'.format(f1(y_test, preds)))
 
+def random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, start, end):
+    training_acc = []
+    testing_acc = []
+    f1_acc = []
+    for trees in range(start, end+10, 10):
+        rclf = RandomForestClassifier(max_depth=7, max_features=11, n_trees=trees)
+        rclf.fit(x_train, y_train)
+        preds_train = rclf.predict(x_train)
+        preds_test = rclf.predict(x_test)
+        training_acc.append(accuracy_score(preds_train, y_train))
+        testing_acc.append(accuracy_score(preds_test, y_test))
+        f1_acc.append(f1(y_test, preds_test))
+
+    # Plotting
+    df = pd.DataFrame({
+        'x': range(start, end+10, 10),
+        'train': training_acc,
+        'test': testing_acc,
+        'f1': f1_acc
+        })
+
+    plt.style.use('seaborn-darkgrid')
+
+
+    num = 0
+
+    for column in df.drop('x', axis=1):
+        num += 1
+        plt.plot(df['x'], df[column], marker='',
+                 linewidth=1, alpha=0.9, label=column)
+    plt.legend(loc=2, ncol=2)
+    plt.title("Accuracy at Varying Number of Trees")
+    plt.xlabel("Number of Trees")
+    plt.ylabel("Accuracy")
+    plt.show()
 
 ###################################################
 # Modify for running your experiments accordingly #
@@ -120,7 +154,8 @@ if __name__ == '__main__':
         # decision_tree_testing(x_train, y_train, x_test, y_test)
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
-        random_forest_testing(x_train, y_train, x_test, y_test)
+        #random_forest_testing(x_train, y_train, x_test, y_test)
+        random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 1000, 1020)
 
     print('Done')
 

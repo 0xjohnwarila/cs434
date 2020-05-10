@@ -232,7 +232,7 @@ class RandomForestClassifier():
             # feature sampling transposes the matrix, so we have to convert to a np array to transpose again
             feature_sampled_X = np.asarray(feature_sampled_X)
             feature_sampled_X = np.transpose(feature_sampled_X)
-            feature_sampled_X = feature_sampled_X.tolist()
+            # feature_sampled_X = feature_sampled_X.tolist()
 
             # append data for current tree to total tree data
             bagged_X.append(feature_sampled_X)

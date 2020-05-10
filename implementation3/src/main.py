@@ -142,7 +142,7 @@ def random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, star
     plt.ylabel("Accuracy")
     plt.show()
 
-def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test, start, end):
+def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test):
     training_acc = []
     testing_acc = []
     f1_acc = []
@@ -191,6 +191,6 @@ if __name__ == '__main__':
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
         #random_forest_testing(x_train, y_train, x_test, y_test)
-        random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
+        random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
 
     print('Done')

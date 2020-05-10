@@ -402,6 +402,7 @@ class AdaBoostClassifier():
         self.number_of_trees = L
 
     def fit(self, x, y):
+        y[y == 0] = -1
         d = [1/x.shape[0] for n in range(x.shape[0])]
         for t in range(self.number_of_trees):
             tree = AdaDecisionTreeClassifier()

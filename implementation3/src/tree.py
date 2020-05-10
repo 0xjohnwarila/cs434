@@ -218,18 +218,25 @@ class RandomForestClassifier():
             sampled_data = np.random.choice(len(X), 2098, replace=True)
 
             # use same index sampling to create matching data and tags
-            temp_X = [X[j] for j in sampled_data]
-            temp_y = [y[j] for j in sampled_data]
+            data_sampled_X = [X[j] for j in sampled_data]
+            data_sampled_y = [y[j] for j in sampled_data]
 
             # randomly sample 11 column indices for feature sampling over X data (no duplicates)
             sampled_features = np.random.choice(len(X[0]), self.max_features, replace = False)
+            # sampled_features.sort()
 
-            # narrow array to selected features
-            temp_X = [temp_X[:][j] for j in sampled_features]
+            # convert X data to np array for feature selection
+            data_sampled_X = np.asarray(data_sampled_X)
+            feature_sampled_X = [data_sampled_X[:,j] for j in sampled_features]
+
+            # feature sampling transposes the matrix, so we have to convert to a np array to transpose again
+            feature_sampled_X = np.asarray(feature_sampled_X)
+            feature_sampled_X = np.transpose(feature_sampled_X)
+            feature_sampled_X = feature_sampled_X.tolist()
 
             # append data for current tree to total tree data
-            bagged_X.append(temp_X)
-            bagged_y.append(temp_y)
+            bagged_X.append(feature_sampled_X)
+            bagged_y.append(data_sampled_y)
 
         # ensure data is still numpy arrays
         return np.array(bagged_X), np.array(bagged_y)

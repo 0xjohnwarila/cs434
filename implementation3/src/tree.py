@@ -37,8 +37,9 @@ class DecisionTreeClassifier():
         makes depth 1 (decision stump)
     """
 
-    def __init__(self, max_depth=None):
+    def __init__(self, max_depth=None, max_features=-1):
         self.max_depth = max_depth
+        self.max_features = max_features
 
     # take in features X and labels y
     # build a tree
@@ -73,7 +74,11 @@ class DecisionTreeClassifier():
     def build_tree(self, X, y, depth):
         num_samples, num_features = X.shape
         # which features we are considering for splitting on
-        self.features_idx = np.arange(0, X.shape[1])
+        if self.max_features > 0:
+            self.features_idx = np.random.choice(X.shape[1], self.max_features,
+                                                 replace=False)
+        else:
+            self.features_idx = np.arange(0, X.shape[1])
 
         # store data and information about best split
         # used when building subtrees recursively
@@ -194,7 +199,8 @@ class RandomForestClassifier():
         self.trees = []
         for i in range(self.n_trees):
             print(i+1, end='\t\r')
-            temp_tree = DecisionTreeClassifier(max_depth=self.max_depth)
+            temp_tree = DecisionTreeClassifier(max_depth=self.max_depth,
+                    max_features=self.max_features)
             temp_tree.fit(bagged_X[i], bagged_y[i])
             self.trees.append(temp_tree)
 
@@ -221,21 +227,8 @@ class RandomForestClassifier():
             data_sampled_X = [X[j] for j in sampled_data]
             data_sampled_y = [y[j] for j in sampled_data]
 
-            # randomly sample 11 column indices for feature sampling over X data (no duplicates)
-            sampled_features = np.random.choice(len(X[0]), self.max_features, replace = False)
-            # sampled_features.sort()
-
-            # convert X data to np array for feature selection
-            data_sampled_X = np.asarray(data_sampled_X)
-            feature_sampled_X = [data_sampled_X[:,j] for j in sampled_features]
-
-            # feature sampling transposes the matrix, so we have to convert to a np array to transpose again
-            feature_sampled_X = np.asarray(feature_sampled_X)
-            feature_sampled_X = np.transpose(feature_sampled_X)
-            # feature_sampled_X = feature_sampled_X.tolist()
-
             # append data for current tree to total tree data
-            bagged_X.append(feature_sampled_X)
+            bagged_X.append(data_sampled_X)
             bagged_y.append(data_sampled_y)
 
         # ensure data is still numpy arrays

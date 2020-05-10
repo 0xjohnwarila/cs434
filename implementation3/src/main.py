@@ -95,7 +95,7 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
 
 def random_forest_testing(x_train, y_train, x_test, y_test):
     print('Random Forest\n\n')
-    rclf = RandomForestClassifier(max_depth=7, max_features=11, n_trees=50)
+    rclf = RandomForestClassifier(max_depth=7, max_features=10, n_trees=200)
     rclf.fit(x_train, y_train)
     preds_train = rclf.predict(x_train)
     preds_test = rclf.predict(x_test)
@@ -190,7 +190,8 @@ if __name__ == '__main__':
         # decision_tree_testing(x_train, y_train, x_test, y_test)
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
-        #random_forest_testing(x_train, y_train, x_test, y_test)
-        random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
+        random_forest_testing(x_train, y_train, x_test, y_test)
+        # random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
+        # random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
 
     print('Done')

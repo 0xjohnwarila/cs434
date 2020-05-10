@@ -333,9 +333,14 @@ class AdaDecisionTreeClassifier():
             else:
                 neg_weight += w
 
+        print(pos_weight)
+        print(neg_weight)
         prediction = -1
         if pos_weight > neg_weight:
             prediction = 1
+
+        #print(prediction)
+
 
         # if we haven't hit the maximum depth, keep building
         if depth <= self.max_depth:
@@ -357,6 +362,7 @@ class AdaDecisionTreeClassifier():
                         best_left_y = left_y
                         best_right_y = right_y
         
+        print(best_feature)
         # if we haven't hit a leaf node
         # add subtrees recursively
         if best_gain > 0.0:
@@ -405,7 +411,7 @@ class AdaDecisionTreeClassifier():
             g_l = 1 - ((cl_pos / len(left_y))**2) - ((cl_neg / len(left_y))**2)
             g_r = 1 - ((cr_pos / len(right_y))**2) - ((cr_neg /
                                                        len(right_y))**2)
-            gain = g_c - p_l * g_l - p_r * g_r
+            gain = g_c - g_l - g_r
             return gain
         # we hit leaf node
         # don't have any gain, and don't want to divide by 0
@@ -420,16 +426,30 @@ class AdaBoostClassifier():
         self.number_of_trees = L
 
     def fit(self, x, y):
+        self.trees = []
         y[y == 0] = -1
         d = [1/x.shape[0] for n in range(x.shape[0])]
         for t in range(self.number_of_trees):
+            print("tree", t)
             tree = AdaDecisionTreeClassifier()
             tree.fit(x, y, d)
+            #print(tree._predict(x[0]))
+            self.trees.append(tree)
             e = self._error(tree, x, y, d)
-
             alpha = self._alpha(e)
             d_t = self._update_weights(e, alpha, tree, x, y, d)
             d = self._normalize(d_t)
+
+    def predict(self, x):
+        predictions = []
+
+        for tree in self.trees:
+            temp = tree.predict(x)
+            predictions.append(tree.predict(x))
+
+        predictions = np.sum(predictions, axis=0)
+        predictions = [0 if i < 0 else 1 for i in predictions]
+        return predictions
 
     def _update_weights(self, e, alpha, tree, x, y, d):
         i = 0

@@ -219,6 +219,11 @@ def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
 def ada_boost_testing(x_train, y_train, x_test, y_test, L=1):
     classifier = AdaBoostClassifier(L)
     classifier.fit(x_train, y_train)
+    preds_train = classifier.predict(x_train)
+    print(accuracy_score(preds_train, y_train))
+    preds_test = classifier.predict(x_test)
+    print(accuracy_score(preds_test, y_test))
+    print(f1(y_test, preds_test))
 
 
 ###################################################
@@ -237,6 +242,6 @@ if __name__ == '__main__':
         # random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
         # random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
     if args.ada_boost == 1:
-        ada_boost_testing(x_train, y_train, x_test, y_test)
+        ada_boost_testing(x_train, y_train, x_test, y_test, L=1)
 
     print('Done')

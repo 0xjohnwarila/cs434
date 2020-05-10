@@ -142,6 +142,44 @@ def random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, star
     plt.ylabel("Accuracy")
     plt.show()
 
+def random_forest_testing_optimal_params(x_train, y_train, x_test, y_test):
+    training_acc = []
+    testing_acc = []
+    f1_acc = []
+    # max_depths = [1, 7, 20]
+    # for depth in max_depths:
+    for i in range(10):
+        np.random.seed()
+        rclf = RandomForestClassifier(max_depth=7, max_features=10, n_trees=200)
+        rclf.fit(x_train, y_train)
+        preds_train = rclf.predict(x_train)
+        preds_test = rclf.predict(x_test)
+        training_acc.append(accuracy_score(preds_train, y_train))
+        testing_acc.append(accuracy_score(preds_test, y_test))
+        f1_acc.append(f1(y_test, preds_test))
+
+    # Plotting
+    df = pd.DataFrame({
+        'x': range(1,11),
+        'train': training_acc,
+        'test': testing_acc,
+        'f1': f1_acc
+        })
+
+    plt.style.use('seaborn-darkgrid')
+
+    num = 0
+
+    for column in df.drop('x', axis=1):
+        num += 1
+        plt.plot(df['x'], df[column], marker='',
+                 linewidth=1, alpha=0.9, label=column)
+    plt.legend(loc=2, ncol=2)
+    plt.title("10 Randomly Seeded Tests with Optimal Parameters")
+    plt.xlabel("Test Number")
+    plt.ylabel("Accuracy")
+    plt.show()
+
 def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test):
     training_acc = []
     testing_acc = []
@@ -178,6 +216,7 @@ def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
     plt.ylabel("Accuracy")
     plt.show()
 
+
 ###################################################
 # Modify for running your experiments accordingly #
 ###################################################
@@ -190,7 +229,7 @@ if __name__ == '__main__':
         # decision_tree_testing(x_train, y_train, x_test, y_test)
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
-        random_forest_testing(x_train, y_train, x_test, y_test)
+        random_forest_testing_optimal_params(x_train, y_train, x_test, y_test)
         # random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
         # random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
 

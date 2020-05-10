@@ -189,13 +189,13 @@ class RandomForestClassifier():
         '''
         fit all trees
         '''
-        bagged_X = self.bag_data(X, y)
+        bagged_X, bagged_y = self.bag_data(X, y)
         print('Fitting Random Forest...\n')
         self.trees = []
         for i in range(self.n_trees):
             print(i+1, end='\t\r')
             temp_tree = DecisionTreeClassifier(max_depth=self.max_depth)
-            temp_tree.fit(bagged_X[i], y)
+            temp_tree.fit(bagged_X[i], bagged_y[i])
             self.trees.append(temp_tree)
 
         print(len(self.trees))
@@ -205,17 +205,17 @@ class RandomForestClassifier():
         bag_data helper
         '''
         bagged_X = []
-        temp = []
+        bagged_y = []
         for i in range(self.n_trees):
-            feature_idx = np.random.choice(len(X[0]), self.max_features,
+            feature_idx = np.random.choice(len(X), self.max_features,
                                            replace=False)
-            temp = [X[:,j] for j in feature_idx]
-            temp = np.asarray(temp)
-            temp = np.transpose(temp)
-            bagged_X.append(temp)
+            temp_X = [X[j] for j in feature_idx]
+            temp_y = [y[j] for j in feature_idx]
+            bagged_X.append(temp_X)
+            bagged_y.append(temp_y)
 
         # ensure data is still numpy arrays
-        return np.array(bagged_X)
+        return np.array(bagged_X), np.array(bagged_y)
 
 
     def predict(self, X):

@@ -407,10 +407,17 @@ class AdaBoostClassifier():
         for t in range(self.number_of_trees):
             tree = AdaDecisionTreeClassifier()
             tree.fit(x, y, d)
-            e = self.error(tree, x, y, d)
+            e = self._error(tree, x, y, d)
 
-            alpha = self.alpha(e)
-            d_t = self.update_weights(e, alpha, tree, x, y)
-            d = self.normalize(d_t)
+            alpha = self._alpha(e)
+            d_t = self._update_weights(e, alpha, tree, x, y)
+            d = self._normalize(d_t)
+
+    def _error(self, tree, x, y, d):
+        return tree.accuracy_score(x, y, d)
+
+    def _alpha(self, e):
+        partial = (1 - e) / e
+        return .5 * np.log(partial)
 
 

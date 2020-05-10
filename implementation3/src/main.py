@@ -66,12 +66,9 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
             best_f1 = f1_accuracy
             best_f1_d = depth
         f1_acc[depth-1] = f1_accuracy
-        if clf.get_best_gain() > best_gain:
-            best_gain = clf.get_best_gain()
 
     print("Best test accuracy is", best_test, "at depth", best_test_d)
     print("Best F1 accuracy is", best_f1, "at depth", best_f1_d)
-    print("Best gain", best_gain)
     plt.axvline(x=best_f1_d, linestyle='dashed')
 
     # Plotting
@@ -84,13 +81,12 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
 
     plt.style.use('seaborn-darkgrid')
 
-    palette = plt.get_cmap('Set1')
 
     num = 0
 
     for column in df.drop('x', axis=1):
         num += 1
-        plt.plot(df['x'], df[column], marker='', color=palette(num),
+        plt.plot(df['x'], df[column], marker='',
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("Accuracy at Varying Decision Tree Depths")

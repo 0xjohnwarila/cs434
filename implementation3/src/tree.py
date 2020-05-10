@@ -333,8 +333,8 @@ class AdaDecisionTreeClassifier():
             else:
                 neg_weight += w
 
-        print(pos_weight)
-        print(neg_weight)
+        # print(pos_weight)
+        # print(neg_weight)
         prediction = -1
         if pos_weight > neg_weight:
             prediction = 1
@@ -351,7 +351,7 @@ class AdaDecisionTreeClassifier():
                 for split in possible_splits:
                     # get the gain and the data on each side of the split
                     # >= split goes on right, < goes on left
-                    gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split, pos_weight, neg_weight)
+                    gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split, weights, pos_weight, neg_weight)
                     # if we have a better gain, use this split and keep track of data
                     if gain > best_gain:
                         best_gain = gain
@@ -362,7 +362,8 @@ class AdaDecisionTreeClassifier():
                         best_left_y = left_y
                         best_right_y = right_y
         
-        print(best_feature)
+        if best_feature is not None:
+            print(best_feature)
         # if we haven't hit a leaf node
         # add subtrees recursively
         if best_gain > 0.0:
@@ -373,10 +374,12 @@ class AdaDecisionTreeClassifier():
         # if we did hit a leaf node
         return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=None, right_tree=None)
 
-    def check_split(self, X, y, feature, split, pos_weight, neg_weight):
+    def check_split(self, X, y, feature, split, weights, pos_weight, neg_weight):
         '''
         check_split gets data corresponding to a split by using numpy indexing
         '''
+        weights = np.array(weights)
+
         left_idx = np.where(X[:, feature] < split)
         right_idx = np.where(X[:, feature] >= split)
         left_x = X[left_idx]
@@ -384,34 +387,45 @@ class AdaDecisionTreeClassifier():
         left_y = y[left_idx]
         right_y = y[right_idx]
 
+        left_w = weights[left_idx]
+        right_w = weights[right_idx]
+
         # calculate gini impurity and gain for y, left_y, right_y
-        gain = self.calculate_gini_gain(y, left_y, right_y, pos_weight, neg_weight)
+        gain = self.calculate_gini_gain(y, left_y, right_y, left_w, right_w, pos_weight, neg_weight)
         return gain, left_x, right_x, left_y, right_y
 
-    def calculate_gini_gain(self, y, left_y, right_y, pos_weight, neg_weight):
+    def calculate_gini_gain(self, y, left_y, right_y, left_w, right_w, pos_weight, neg_weight):
         # not a leaf node
         # calculate gini impurity and gain
         gain = 0
         if len(left_y) > 0 and len(right_y) > 0:
             # get counts for root
-            c_pos = sum(y) * pos_weight
-            c_neg = len(y) - c_pos * neg_weight
+            c_pos = pos_weight
+            c_neg = neg_weight
 
-            # get counts for left split
-            cl_pos = np.sum(left_y) * pos_weight
-            cl_neg = len(left_y) - cl_pos * neg_weight
+            wl_pos = 0
+            wl_neg = 0
+            for tag, w in zip(left_y, left_w):
+                if tag > 0:
+                    wl_pos += w
+                else:
+                    wl_neg += w
 
-            # get counts for right splits
-            cr_pos = np.sum(right_y) * pos_weight
-            cr_neg = len(right_y) - cr_pos * neg_weight
+            wr_pos = 0
+            wr_neg = 0
+            for tag, w in zip(right_y, right_w):
+                if tag > 0:
+                    wr_pos += w
+                else:
+                    wr_neg += w
 
-            p_l = len(left_y) / len(y)
-            p_r = len(right_y) / len(y)
+            p_l = len(left_w) / len(y)
+            p_r = len(right_w) / len(y)
             g_c = 1 - ((c_pos / len(y))**2) - ((c_neg / len(y))**2)
-            g_l = 1 - ((cl_pos / len(left_y))**2) - ((cl_neg / len(left_y))**2)
-            g_r = 1 - ((cr_pos / len(right_y))**2) - ((cr_neg /
-                                                       len(right_y))**2)
-            gain = g_c - g_l - g_r
+            g_l = 1 - ((wl_pos / len(left_w))**2) - ((wl_neg / len(left_w))**2)
+            g_r = 1 - ((wr_pos / len(right_w))**2) - ((wr_neg /
+                                                       len(right_w))**2)
+            gain = g_c - p_l * g_l - p_r * g_r
             return gain
         # we hit leaf node
         # don't have any gain, and don't want to divide by 0
@@ -430,7 +444,7 @@ class AdaBoostClassifier():
         y[y == 0] = -1
         d = [1/x.shape[0] for n in range(x.shape[0])]
         for t in range(self.number_of_trees):
-            print("tree", t)
+            # print("tree", t)
             tree = AdaDecisionTreeClassifier()
             tree.fit(x, y, d)
             #print(tree._predict(x[0]))

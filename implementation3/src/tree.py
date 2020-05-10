@@ -224,12 +224,13 @@ class RandomForestClassifier():
         '''
         preds = []
 
-        print(self.trees[1].predict(X))
-        exit()
+        for i in range(self.n_trees):
+            tmp = self.trees[i].predict(X)
+            tmp2 = [-1 if j == 0 else j for j in tmp]
+            preds.append(tmp2)
 
-        # remove this one \/
-        preds = np.ones(len(X)).astype(int)
-        # ^that line is only here so the code runs
+        preds = np.sum(preds, axis=0)
+        preds = [0 if j < 0 else 1 for j in preds]
 
         ##################
         # YOUR CODE HERE #

@@ -142,6 +142,42 @@ def random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, star
     plt.ylabel("Accuracy")
     plt.show()
 
+def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test, start, end):
+    training_acc = []
+    testing_acc = []
+    f1_acc = []
+    features_array = [1, 2, 5, 8, 10, 20, 25, 35, 50]
+    for features in features_array:
+        rclf = RandomForestClassifier(max_depth=7, max_features=features, n_trees=50)
+        rclf.fit(x_train, y_train)
+        preds_train = rclf.predict(x_train)
+        preds_test = rclf.predict(x_test)
+        training_acc.append(accuracy_score(preds_train, y_train))
+        testing_acc.append(accuracy_score(preds_test, y_test))
+        f1_acc.append(f1(y_test, preds_test))
+
+    # Plotting
+    df = pd.DataFrame({
+        'x': features_array,
+        'train': training_acc,
+        'test': testing_acc,
+        'f1': f1_acc
+        })
+
+    plt.style.use('seaborn-darkgrid')
+
+    num = 0
+
+    for column in df.drop('x', axis=1):
+        num += 1
+        plt.plot(df['x'], df[column], marker='',
+                 linewidth=1, alpha=0.9, label=column)
+    plt.legend(loc=2, ncol=2)
+    plt.title("Accuracy at Varying Number of Features")
+    plt.xlabel("Number of Features")
+    plt.ylabel("Accuracy")
+    plt.show()
+
 ###################################################
 # Modify for running your experiments accordingly #
 ###################################################
@@ -155,11 +191,6 @@ if __name__ == '__main__':
         varying_depth_tree_testing(x_train, y_train, x_test, y_test, 1, 25)
     if args.random_forest == 1:
         #random_forest_testing(x_train, y_train, x_test, y_test)
-        random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, 10, 200)
+        random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test, 10, 200)
 
     print('Done')
-
-
-
-
-

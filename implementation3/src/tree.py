@@ -227,6 +227,7 @@ class RandomForestClassifier():
             # narrow array to selected features
             temp_X = [temp_X[:][j] for j in sampled_features]
 
+            # append data for current tree to total tree data
             bagged_X.append(temp_X)
             bagged_y.append(temp_y)
 

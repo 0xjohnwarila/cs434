@@ -205,11 +205,15 @@ class RandomForestClassifier():
         bagged_X = []
         bagged_y = []
         for i in range(self.n_trees):
-            continue
-            ##################
-            # YOUR CODE HERE #
-            ##################
-
+            feature_idx = np.random.choice(len(X), self.max_features,
+                                           replace=False)
+            bagged_X = [X[j] for j in feature_idx]
+            print(type(bagged_X))
+            bagged_y = [y[j] for j in feature_idx]
+            print(len(feature_idx))
+            print("bagged x",bagged_X)
+            print("bagged y", bagged_y)
+            exit()
         # ensure data is still numpy arrays
         return np.array(bagged_X), np.array(bagged_y)
 

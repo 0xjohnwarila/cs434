@@ -11,10 +11,10 @@ sns.set()
 def load_args():
 
     parser = argparse.ArgumentParser(description='arguments')
-    parser.add_argument('--county_dict', default=1, type=int)
-    parser.add_argument('--decision_tree', default=1, type=int)
-    parser.add_argument('--random_forest', default=1, type=int)
-    parser.add_argument('--ada_boost', default=1, type=int)
+    parser.add_argument('--county_dict', default=0, type=int)
+    parser.add_argument('--decision_tree', default=0, type=int)
+    parser.add_argument('--random_forest', default=0, type=int)
+    parser.add_argument('--ada_boost', default=0, type=int)
     parser.add_argument('--root_dir', default='../data/', type=str)
     _args = parser.parse_args()
 

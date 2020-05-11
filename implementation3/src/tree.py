@@ -392,6 +392,8 @@ class AdaDecisionTreeClassifier():
 
         # calculate gini impurity and gain for y, left_y, right_y
         gain = self.calculate_gini_gain(y, left_y, right_y, left_w, right_w, pos_weight, neg_weight)
+
+
         return gain, left_x, right_x, left_y, right_y
 
     def calculate_gini_gain(self, y, left_y, right_y, left_w, right_w, pos_weight, neg_weight):
@@ -452,11 +454,11 @@ class AdaBoostClassifier():
             e = self._error(tree, x, y, d)
             alpha = self._alpha(e)
             d_t = self._update_weights(e, alpha, tree, x, y, d)
+            print('sum', np.sum(d_t))
             d = self._normalize(d_t)
 
     def predict(self, x):
         predictions = []
-
         for tree in self.trees:
             temp = tree.predict(x)
             predictions.append(tree.predict(x))
@@ -470,9 +472,9 @@ class AdaBoostClassifier():
         for sample, tag in zip(x, y):
             prediction = tree._predict(sample)
             if prediction == tag:
-                d[i] = d[i]*(e**(-alpha))
+                d[i] = d[i]*np.exp(-alpha)
             else:
-                d[i] = d[i]*(e**(alpha))
+                d[i] = d[i]*np.exp(-alpha)
 
             i += 1
 
@@ -484,7 +486,14 @@ class AdaBoostClassifier():
         return d
 
     def _error(self, tree, x, y, d):
-        return tree.accuracy_score(x, y)
+        error = 0
+        for sample, tag, weight in zip(x, y, d):
+            tmp = 1
+            if tree._predict(sample) == tag:
+                tmp = 0
+            error += weight * tmp
+        print("error", error)
+        return error
 
     def _alpha(self, e):
         partial = (1 - e) / e

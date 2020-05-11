@@ -145,18 +145,32 @@ class DecisionTreeClassifier():
         # calculate gini impurity and gain
         gain = 0
         if len(left_y) > 0 and len(right_y) > 0:
+            # Get the center counts
             c_pos = sum(y)
             c_neg = len(y) - c_pos
+
+            # Get left counts
             cl_pos = np.sum(left_y)
             cl_neg = len(left_y) - cl_pos
+
+            # Get right counts
             cr_pos = np.sum(right_y)
             cr_neg = len(right_y) - cr_pos
+
+            # Priors
             p_l = len(left_y) / len(y)
             p_r = len(right_y) / len(y)
+
+            # U(A)
             g_c = 1 - ((c_pos / len(y))**2) - ((c_neg / len(y))**2)
+            
+            # U(AL)
             g_l = 1 - ((cl_pos / len(left_y))**2) - ((cl_neg / len(left_y))**2)
+
+            # U(AR)
             g_r = 1 - ((cr_pos / len(right_y))**2) - ((cr_neg /
                                                        len(right_y))**2)
+            # B = U(A) - pl*U(AL) - pr*U(AR)
             gain = g_c - p_l * g_l - p_r * g_r
             return gain
         # we hit leaf node
@@ -186,17 +200,16 @@ class RandomForestClassifier():
         self.max_features = max_features
         self.max_depth = max_depth
 
-        ##################
-        # YOUR CODE HERE #
-        ##################
-
     def fit(self, X, y):
         '''
         fit all trees
         '''
+
+        # get the bagged x and y
         bagged_X, bagged_y = self.bag_data(X, y)
         print('Fitting Random Forest...\n')
         self.trees = []
+        # Fit each tree
         for i in range(self.n_trees):
             print(i+1, end='\t\r')
             temp_tree = DecisionTreeClassifier(max_depth=self.max_depth,
@@ -239,17 +252,17 @@ class RandomForestClassifier():
         '''
         preds = []
 
+        # For all our trees, take a vote
         for i in range(self.n_trees):
             tmp = self.trees[i].predict(X)
+            # List comprehension of the prediction
             tmp2 = [-1 if j == 0 else j for j in tmp]
             preds.append(tmp2)
 
+        # Sum the votes
         preds = np.sum(preds, axis=0)
         preds = [0 if j < 0 else 1 for j in preds]
 
-        ##################
-        # YOUR CODE HERE #
-        ##################
         return preds
 
 
@@ -288,6 +301,8 @@ class AdaDecisionTreeClassifier():
     # prediction for a given example
     # traverse tree by following splits at nodes
     def _predict(self, example):
+
+        # Special prediction expecting there only to be a left and right node, storing the predictions
         node = self.root
         if example[node.feature] < node.split:
             return node.left_tree.prediction
@@ -310,7 +325,9 @@ class AdaDecisionTreeClassifier():
         best_feature = None
         best_split = None
         best_error = float('inf')
+        # Prediction left
         p_l = None
+        # Prediction right
         p_r = None
 
 
@@ -322,10 +339,9 @@ class AdaDecisionTreeClassifier():
                 # consider the set of all values for that feature to split on
                 possible_splits = np.unique(X[:, feature])
                 for split in possible_splits:
-                    # get the gain and the data on each side of the split
                     # >= split goes on right, < goes on left
                     error, prediction_l, prediction_r = self.check_split(X, y, feature, split, weights)
-                    # if we have a better gain, use this split and keep track of data
+                    # If the error is lower, remember it
                     if error < best_error:
                         best_error = error
                         best_feature = feature
@@ -333,15 +349,17 @@ class AdaDecisionTreeClassifier():
                         p_l = prediction_l
                         p_r = prediction_r
         
-        # if we did hit a leaf node
+        # Store the predictions in the left and right nodes
         left_tree = Node(p_l, None, None, None, None)
         right_tree = Node(p_r, None, None, None, None)
 
+        # Return the stump
         return Node(prediction=None, feature=best_feature, split=best_split, left_tree=left_tree, right_tree=right_tree)
 
     def check_split(self, X, y, feature, split, weights):
         '''
-        check_split gets data corresponding to a split by using numpy indexing
+        check_split gets data corresponding to a split by using numpy indexing.
+        Also gets the prediction and error for both sides
         '''
         weights = np.array(weights)
 
@@ -354,6 +372,7 @@ class AdaDecisionTreeClassifier():
         left_w = weights[left_idx]
         right_w = weights[right_idx]
 
+        # Get the weights for both sides
         left_w_pos = 0
         left_w_neg = 0
         for tag, w in zip(left_y, left_w):
@@ -371,16 +390,18 @@ class AdaDecisionTreeClassifier():
             else:
                 right_w_neg += w
 
-        p_l = -1
 
+        # Get the prediction for the left side
+        p_l = -1
         if left_w_pos > left_w_neg:
             p_l = 1
 
+        # Get the prediction for the right side
         p_r = -1
-
         if right_w_pos > right_w_neg:
             p_r = 1
         
+        # Calculate the error for the split
         error = 0
         for sample, tag, weight in zip(X, y, weights):
             pred = 0
@@ -388,46 +409,54 @@ class AdaDecisionTreeClassifier():
                 pred = p_l
             else:
                 pred = p_r
-            
             tmp = 1
             if pred == tag:
                 tmp = 0
             error += weight * tmp
             
+        # Return the error and the predictions
         return error, p_l, p_r
 
-################################################
-# YOUR CODE GOES IN ADABOOSTCLASSIFIER         #
-# MUST MODIFY THIS EXISTING DECISION TREE CODE #
-################################################
 class AdaBoostClassifier():
     def __init__(self, L):
         self.number_of_trees = L
 
     def fit(self, x, y):
         self.trees = []
+
+        # Convert the labels to -1, 1 format
         y[y == 0] = -1
+        # Get the base weights
         d = [1/x.shape[0] for n in range(x.shape[0])]
+
+        # Train every stump
         for t in range(self.number_of_trees):
             tree = AdaDecisionTreeClassifier()
+            # Fit the tree on the data and the weights D
             tree.fit(x, y, d)
             self.trees.append(tree)
+            # Calculate the weighted error of the tree
             e = self._error(tree, x, y, d)
+            # Calculate alpha from the error
             alpha = self._alpha(e)
-            d_t = self._update_weights(e, alpha, tree, x, y, d)
+            # Update and Normalize the weights
+            d_t = self._update_weights(alpha, tree, x, y, d)
             d = self._normalize(d_t)
 
     def predict(self, x):
         predictions = []
+        # Get the predictions from each tree
         for tree in self.trees:
             temp = tree.predict(x)
             predictions.append(tree.predict(x))
 
+        # Sum and take the vote
         predictions = np.sum(predictions, axis=0)
         predictions = [0 if i < 0 else 1 for i in predictions]
         return predictions
 
-    def _update_weights(self, e, alpha, tree, x, y, d):
+    def _update_weights(self, alpha, tree, x, y, d):
+        # Update every weight based off alpha
         i = 0
         for sample, tag in zip(x, y):
             prediction = tree._predict(sample)
@@ -441,19 +470,23 @@ class AdaBoostClassifier():
         return d
 
     def _normalize(self, d):
+        # Normalize the weights to sum to 1
         sum = np.sum(np.array(d))
         d = [i/sum for i in d]
         return d
 
     def _error(self, tree, x, y, d):
         error = 0
+        # Calculate the weighted error.
         for sample, tag, weight in zip(x, y, d):
             tmp = 1
             if tree._predict(sample) == tag:
                 tmp = 0
+            # When the tree makes an error, add the weight for that sample
             error += weight * tmp
         return error
 
     def _alpha(self, e):
+        # Caclualte alpha. 1/2 * ln((1-e)/e)
         partial = (1 - e) / e
         return .5 * np.log(partial)

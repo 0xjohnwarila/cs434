@@ -68,7 +68,6 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
 
     print("Best test accuracy is", best_test, "at depth", best_test_d)
     print("Best F1 accuracy is", best_f1, "at depth", best_f1_d)
-    plt.axvline(x=best_f1_d, linestyle='dashed')
 
     # Plotting
     df = pd.DataFrame({
@@ -89,8 +88,8 @@ def varying_depth_tree_testing(x_train, y_train, x_test, y_test, start, end):
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("Accuracy at Varying Decision Tree Depths")
-    plt.xlabel("Depth")
-    plt.ylabel("Accuracy")
+    plt.xlabel("Depth", fontsize=14)
+    plt.ylabel("Accuracy", fontsize=14)
     plt.show()
 
 def random_forest_testing(x_train, y_train, x_test, y_test):
@@ -138,8 +137,8 @@ def random_forest_testing_varying_n_trees(x_train, y_train, x_test, y_test, star
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("Accuracy at Varying Number of Trees")
-    plt.xlabel("Number of Trees")
-    plt.ylabel("Accuracy")
+    plt.xlabel("Number of Trees", fontsize=14)
+    plt.ylabel("Accuracy", fontsize=14)
     plt.show()
 
 def random_forest_testing_optimal_params(x_train, y_train, x_test, y_test):
@@ -176,8 +175,8 @@ def random_forest_testing_optimal_params(x_train, y_train, x_test, y_test):
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("10 Randomly Seeded Tests with Optimal Parameters")
-    plt.xlabel("Test Number")
-    plt.ylabel("Accuracy")
+    plt.xlabel("Test Number", fontsize=14)
+    plt.ylabel("Accuracy", fontsize=14)
     plt.show()
 
 def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test):
@@ -212,8 +211,8 @@ def random_forest_testing_varying_max_features(x_train, y_train, x_test, y_test)
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("Accuracy at Varying Number of Features")
-    plt.xlabel("Number of Features")
-    plt.ylabel("Accuracy")
+    plt.xlabel("Number of Features", fontsize=14)
+    plt.ylabel("Accuracy", fontsize=14)
     plt.show()
 
 def ada_boost_testing(x_train, y_train, x_test, y_test, L=1):
@@ -258,8 +257,8 @@ def ada_boost_testing_varying_L(x_train, y_train, x_test, y_test, start, end):
                  linewidth=1, alpha=0.9, label=column)
     plt.legend(loc=2, ncol=2)
     plt.title("Accuracy at Varying Values of L")
-    plt.xlabel("L")
-    plt.ylabel("Accuracy")
+    plt.xlabel("L", fontsize=14)
+    plt.ylabel("Accuracy", fontsize=14)
     plt.show()
 
 

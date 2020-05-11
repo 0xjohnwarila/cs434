@@ -204,8 +204,6 @@ class RandomForestClassifier():
             temp_tree.fit(bagged_X[i], bagged_y[i])
             self.trees.append(temp_tree)
 
-        print(len(self.trees))
-
     def bag_data(self, X, y, proportion=1.0):
         '''
         bag_data helper
@@ -291,12 +289,9 @@ class AdaDecisionTreeClassifier():
     # traverse tree by following splits at nodes
     def _predict(self, example):
         node = self.root
-        while node.left_tree:
-            if example[node.feature] < node.split:
-                node = node.left_tree
-            else:
-                node = node.right_tree
-        return node.prediction
+        if example[node.feature] < node.split:
+            return node.left_tree.prediction
+        return node.right_tree.prediction
 
     # accuracy
     def accuracy_score(self, X, y):
@@ -314,32 +309,10 @@ class AdaDecisionTreeClassifier():
         # used when building subtrees recursively
         best_feature = None
         best_split = None
-        best_gain = 0.0
-        best_left_X = None
-        best_left_y = None
-        best_right_X = None
-        best_right_y = None
+        best_error = float('inf')
+        p_l = None
+        p_r = None
 
-        # what we would predict at this node if we had to
-        # majority class
-        # num_samples_per_class = [np.sum(y == i) for i in range(self.num_classes)]
-        # prediction = np.argmax(num_samples_per_class)
-
-        pos_weight = 0
-        neg_weight = 0
-        for tag, w in zip(y, weights):
-            if tag > 0:
-                pos_weight += w
-            else:
-                neg_weight += w
-
-        # print(pos_weight)
-        # print(neg_weight)
-        prediction = -1
-        if pos_weight > neg_weight:
-            prediction = 1
-
-        #print(prediction)
 
 
         # if we haven't hit the maximum depth, keep building
@@ -351,30 +324,22 @@ class AdaDecisionTreeClassifier():
                 for split in possible_splits:
                     # get the gain and the data on each side of the split
                     # >= split goes on right, < goes on left
-                    gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split, weights, pos_weight, neg_weight)
+                    error, prediction_l, prediction_r = self.check_split(X, y, feature, split, weights)
                     # if we have a better gain, use this split and keep track of data
-                    if gain > best_gain:
-                        best_gain = gain
+                    if error < best_error:
+                        best_error = error
                         best_feature = feature
                         best_split = split
-                        best_left_X = left_X
-                        best_right_X = right_X
-                        best_left_y = left_y
-                        best_right_y = right_y
+                        p_l = prediction_l
+                        p_r = prediction_r
         
-        if best_feature is not None:
-            print(best_feature)
-        # if we haven't hit a leaf node
-        # add subtrees recursively
-        if best_gain > 0.0:
-            left_tree = self.build_tree(best_left_X, best_left_y, weights, depth=depth+1)
-            right_tree = self.build_tree(best_right_X, best_right_y, weights, depth=depth+1)
-            return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=left_tree, right_tree=right_tree)
-
         # if we did hit a leaf node
-        return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=None, right_tree=None)
+        left_tree = Node(p_l, None, None, None, None)
+        right_tree = Node(p_r, None, None, None, None)
 
-    def check_split(self, X, y, feature, split, weights, pos_weight, neg_weight):
+        return Node(prediction=None, feature=best_feature, split=best_split, left_tree=left_tree, right_tree=right_tree)
+
+    def check_split(self, X, y, feature, split, weights):
         '''
         check_split gets data corresponding to a split by using numpy indexing
         '''
@@ -382,56 +347,54 @@ class AdaDecisionTreeClassifier():
 
         left_idx = np.where(X[:, feature] < split)
         right_idx = np.where(X[:, feature] >= split)
-        left_x = X[left_idx]
-        right_x = X[right_idx]
+
         left_y = y[left_idx]
         right_y = y[right_idx]
 
         left_w = weights[left_idx]
         right_w = weights[right_idx]
 
-        # calculate gini impurity and gain for y, left_y, right_y
-        gain = self.calculate_gini_gain(y, left_y, right_y, left_w, right_w, pos_weight, neg_weight)
+        left_w_pos = 0
+        left_w_neg = 0
+        for tag, w in zip(left_y, left_w):
+            if tag > 0:
+                left_w_pos += w
+            else:
+                left_w_neg += w
 
+        right_w_pos = 0
+        right_w_neg = 0
 
-        return gain, left_x, right_x, left_y, right_y
+        for tag, w in zip(right_y, right_w):
+            if tag > 0:
+                right_w_pos += w
+            else:
+                right_w_neg += w
 
-    def calculate_gini_gain(self, y, left_y, right_y, left_w, right_w, pos_weight, neg_weight):
-        # not a leaf node
-        # calculate gini impurity and gain
-        gain = 0
-        if len(left_y) > 0 and len(right_y) > 0:
-            # get counts for root
-            c_pos = pos_weight
-            c_neg = neg_weight
+        p_l = -1
 
-            wl_pos = 0
-            wl_neg = 0
-            for tag, w in zip(left_y, left_w):
-                if tag > 0:
-                    wl_pos += w
-                else:
-                    wl_neg += w
+        if left_w_pos > left_w_neg:
+            p_l = 1
 
-            wr_pos = 0
-            wr_neg = 0
-            for tag, w in zip(right_y, right_w):
-                if tag > 0:
-                    wr_pos += w
-                else:
-                    wr_neg += w
+        p_r = -1
 
-            p_l = len(left_w) / len(y)
-            p_r = len(right_w) / len(y)
-            g_c = 1 - ((c_pos / len(y))**2) - ((c_neg / len(y))**2)
-            g_l = 1 - ((wl_pos / len(left_w))**2) - ((wl_neg / len(left_w))**2)
-            g_r = 1 - ((wr_pos / len(right_w))**2) - ((wr_neg /
-                                                       len(right_w))**2)
-            gain = g_c - p_l * g_l - p_r * g_r
-            return gain
-        # we hit leaf node
-        # don't have any gain, and don't want to divide by 0
-        return 0
+        if right_w_pos > right_w_neg:
+            p_r = 1
+        
+        error = 0
+        for sample, tag, weight in zip(X, y, weights):
+            pred = 0
+            if sample[feature] < split:
+                pred = p_l
+            else:
+                pred = p_r
+            
+            tmp = 1
+            if pred == tag:
+                tmp = 0
+            error += weight * tmp
+            
+        return error, p_l, p_r
 
 ################################################
 # YOUR CODE GOES IN ADABOOSTCLASSIFIER         #
@@ -446,15 +409,12 @@ class AdaBoostClassifier():
         y[y == 0] = -1
         d = [1/x.shape[0] for n in range(x.shape[0])]
         for t in range(self.number_of_trees):
-            # print("tree", t)
             tree = AdaDecisionTreeClassifier()
             tree.fit(x, y, d)
-            #print(tree._predict(x[0]))
             self.trees.append(tree)
             e = self._error(tree, x, y, d)
             alpha = self._alpha(e)
             d_t = self._update_weights(e, alpha, tree, x, y, d)
-            print('sum', np.sum(d_t))
             d = self._normalize(d_t)
 
     def predict(self, x):
@@ -474,7 +434,7 @@ class AdaBoostClassifier():
             if prediction == tag:
                 d[i] = d[i]*np.exp(-alpha)
             else:
-                d[i] = d[i]*np.exp(-alpha)
+                d[i] = d[i]*np.exp(alpha)
 
             i += 1
 
@@ -492,7 +452,6 @@ class AdaBoostClassifier():
             if tree._predict(sample) == tag:
                 tmp = 0
             error += weight * tmp
-        print("error", error)
         return error
 
     def _alpha(self, e):

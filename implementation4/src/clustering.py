@@ -109,15 +109,18 @@ class KMeans():
         """
         tags = np.zeros(self.k)
         sums = np.zeros((self.k, 6))
-        for i, _ in enumerate(labels):
-            sums[i][y[i]-1] += 1
+        for i, label in enumerate(labels):
+            sums[label][y[i]-1] += 1
 
         for i, sum_ in enumerate(sums):
-            tags[i] = np.argmax(sum_)
-            print(tags[i])
+            tags[i] = np.argmax(sum_)+1
 
+        correct = 0
+        for label, truth in zip(labels, y):
+            if tags[label] == truth:
+                correct += 1
 
-        print(labels.shape)
+        purity = correct / len(y)
         return purity
 
     def fit(self, x):

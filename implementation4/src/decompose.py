@@ -66,6 +66,13 @@ class PCA():
         ########################################
         #       YOUR CODE GOES HERE            #
         ########################################
+        cov_mat = PCA.cov(x)
+        eigval, eigvec = PCA.eig(cov_mat)
+        
+        idx = np.argsort(eigval)
+
+        self.eig_vals = np.array([eigval[idx[i]] for i in range(10)])
+        self.eig_vecs = np.array([eigvec[idx[i]] for i in range(10)]).T
 
 
     def transform(self, x):
@@ -78,6 +85,7 @@ class PCA():
         if isinstance(x, np.ndarray):
             x = np.asarray(x)
         if self.eig_vecs is not None:
+            print(x.shape, self.eig_vecs.shape)
             return np.matmul(x, self.eig_vecs)
         else:
             return x

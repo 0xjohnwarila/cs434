@@ -80,7 +80,25 @@ def visualize(x_train, y_train):
     ##################################
     #      YOUR CODE GOES HERE       #
     ##################################
-    pass
+    df = pd.DataFrame(dict(x=x_train[:,0], y=x_train[:,1], label=y_train))
+
+    fld = os.path.join(args.root_dir, save_path)
+    if not os.path.exists((fld)):
+        os.mkdir(fld)
+    fig = plt.figure(constrained_layout=True)
+
+    groups = df.groupby('label')
+    fig, ax = plt.subplots()
+    ax.margins(0.05)
+    for name, group in groups:
+        ax.plot(group.x, group.y, marker='o', linestyle='', ms=6, label=name)
+    ax.legend()
+    plt.xlabel("Principle Component 1")
+    plt.ylabel("Principle Component 2")
+    plt.show()
+    fig.savefig(os.path.join(fld, '%d_%d.png' % (pp[0], pp[-1])))
+
+    print('Saved at : %s' % fld)
     # The first 2 of x_train will be the first and second principle components
     # Each permutation in y_train (1-6) should be a different color
     # Need to plot all points with respect two the first two PCs, coloring the

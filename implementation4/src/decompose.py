@@ -87,7 +87,9 @@ class PCA():
         print('max eigval', max(eigval))
 
         self.eig_vals = np.array([eigval[eigidx[j]] for j in range(i)])
-        self.eig_vecs = np.array([eigvec[eigidx[j]] for j in range(i)]).T
+        self.eig_vecs = np.ndarray((561, eigvec.shape[1]))
+        for j in range(i):
+            self.eig_vecs[:,j] = eigvec[:,eigidx[j]]
 
         print(self.eig_vals)
 

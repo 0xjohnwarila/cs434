@@ -77,10 +77,10 @@ def plot_y_vs_x(ys_vs_x, x_label, y_label, save_path):
 
 
 def visualize(x_train, y_train):
-    pass
     ##################################
     #      YOUR CODE GOES HERE       #
     ##################################
+    
 
 
 def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
@@ -92,7 +92,6 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     ##################################
     #      YOUR CODE GOES HERE       #
     ##################################
-    """
     for k in range(1, kmeans_max_k):
         kmeans = KMeans(k, kmeans_max_iter)
         sse_vs_iter = kmeans.fit(x_train)
@@ -137,7 +136,6 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
 
     plot_y_vs_x(avg_sses_vs_k, x_label='k', y_label='sse',
                 save_path='avg_plot_sses_vs_k_subplots_%d' % do_pca)
-    """
     print("AVG Purities vs K")
     avg_purities_vs_k = np.zeros(kmeans_max_iter)
     sse_vs_iter = []

@@ -43,6 +43,9 @@ class KMeans():
 
         for i in range(self.k):
             wherei = np.squeeze(np.argwhere(labels == i), axis=1)
+            if x[wherei, :].size == 0:
+                print("Empty Slice")
+                continue
             self.centers[i, :] = x[wherei, :].mean(0)
 
     def predict(self, x):
@@ -98,15 +101,6 @@ class KMeans():
         ##################################
         #      YOUR CODE GOES HERE       #
         ##################################
-        """
-        correct = 0
-        for label, truth in zip(labels, y):
-            if label == truth:
-                correct += 1
-
-        purity = correct / len(y)
-        print("Purity:", purity)
-        """
         tags = np.zeros(self.k)
         sums = np.zeros((self.k, 6))
         for i, label in enumerate(labels):
@@ -121,6 +115,7 @@ class KMeans():
                 correct += 1
 
         purity = correct / len(y)
+        print(purity)
         return purity
 
     def fit(self, x):

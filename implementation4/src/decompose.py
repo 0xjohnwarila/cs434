@@ -68,11 +68,28 @@ class PCA():
         ########################################
         cov_mat = PCA.cov(x)
         eigval, eigvec = PCA.eig(cov_mat)
-        
-        idx = np.argsort(eigval)
 
-        self.eig_vals = np.array([eigval[idx[i]] for i in range(10)])
-        self.eig_vecs = np.array([eigvec[idx[i]] for i in range(10)]).T
+        idx = np.argsort(eigval)
+        eigidx = idx[::-1]
+
+        total_var = sum(eigval)
+        k_variance = 0
+        print('Total variance', total_var)
+
+        i = 0
+        while k_variance < self.retain_ratio * total_var:
+            k_variance += eigval[eigidx[i]]
+            i += 1
+
+        print(self.retain_ratio * total_var)
+        print('K Variance', k_variance)
+        print(i)
+        print('max eigval', max(eigval))
+
+        self.eig_vals = np.array([eigval[eigidx[j]] for j in range(i)])
+        self.eig_vecs = np.array([eigvec[eigidx[j]] for j in range(i)]).T
+
+        print(self.eig_vals)
 
 
     def transform(self, x):
@@ -85,7 +102,6 @@ class PCA():
         if isinstance(x, np.ndarray):
             x = np.asarray(x)
         if self.eig_vecs is not None:
-            print(x.shape, self.eig_vecs.shape)
             return np.matmul(x, self.eig_vecs)
         else:
             return x

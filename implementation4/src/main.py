@@ -80,8 +80,11 @@ def visualize(x_train, y_train):
     ##################################
     #      YOUR CODE GOES HERE       #
     ##################################
-    
-
+    pass
+    # The first 2 of x_train will be the first and second principle components
+    # Each permutation in y_train (1-6) should be a different color
+    # Need to plot all points with respect two the first two PCs, coloring the
+    # different classes.
 
 def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     print('kmeans\n')

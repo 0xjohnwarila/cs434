@@ -66,23 +66,30 @@ class PCA():
         ########################################
         #       YOUR CODE GOES HERE            #
         ########################################
+
+        # Get the covariance matrix
         cov_mat = PCA.cov(x)
+        # Get the eigen valus and vectors
         eigval, eigvec = PCA.eig(cov_mat)
 
+        # Sort the idencices of the eigvalues
         idx = np.argsort(eigval)
+        # Wrong way, want descending
         eigidx = idx[::-1]
 
+        # Get total variance
         total_var = sum(eigval)
         k_variance = 0
-        print('Total variance', total_var)
 
+        # Figure out how many eigenvalues we want
         i = 0
         while k_variance < self.retain_ratio * total_var:
             k_variance += eigval[eigidx[i]]
             i += 1
 
-        print(i)
+        # Set the eigen values
         self.eig_vals = np.array([eigval[eigidx[j]] for j in range(i)])
+        # Mess with columns and vectors, then set eigen vectors
         self.eig_vecs = np.ndarray((561, eigvec.shape[1]))
         for j in range(i):
             self.eig_vecs[:,j] = eigvec[:,eigidx[j]]

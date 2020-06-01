@@ -62,9 +62,13 @@ class KMeans():
         ##################################
         #      YOUR CODE GOES HERE       #
         ##################################
+        
+        # For every sample, assign it to a center
         for i, sample in enumerate(x):
             min_d = float('inf')
             min_c = -1
+            # This could probably be made to be a matrix math op, but nested
+            # for loop go brrr
             for j, center in enumerate(self.centers):
                 dist = np.linalg.norm(sample - center)
 
@@ -105,14 +109,18 @@ class KMeans():
         ##################################
         #      YOUR CODE GOES HERE       #
         ##################################
+        
+        # Prep the centers to have tags associated
         tags = np.zeros(self.k)
         sums = np.zeros((self.k, 6))
         for i, label in enumerate(labels):
             sums[label][y[i]-1] += 1
 
+        # Set the largest tag to be one for the center
         for i, sum_ in enumerate(sums):
             tags[i] = np.argmax(sum_)+1
 
+        # Calculate percent correct
         correct = 0
         for label, truth in zip(labels, y):
             if tags[label] == truth:

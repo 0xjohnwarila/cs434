@@ -16,7 +16,7 @@ class KMeans():
         self.k = k
         self.max_iter = max_iter
 
-    def init_center(self, x):
+    def init_center(self, x, param_num=-1):
         """
         init_center initializes the center of the clusters using the given
         input
@@ -26,7 +26,12 @@ class KMeans():
 
         self.centers = np.zeros((self.k, x.shape[1]))
 
-        idx = np.random.choice(x.shape[1], self.k, replace=False)
+        if param_num > 0:
+            print(param_num)
+            exit()
+            idx = np.random.choice(param_num, self.k, replace=False)
+        else:
+            idx = np.random.choice(x.shape[1], self.k, replace=False)
 
         for i, index in enumerate(idx):
             self.centers[i] = x[index]
@@ -43,9 +48,8 @@ class KMeans():
 
         for i in range(self.k):
             wherei = np.squeeze(np.argwhere(labels == i), axis=1)
-            if x[wherei, :].size == 0:
-                print("Empty Slice")
-                continue
+            #if x[wherei, :].size == 0:
+            #    continue
             self.centers[i, :] = x[wherei, :].mean(0)
 
     def predict(self, x):
@@ -118,7 +122,7 @@ class KMeans():
         print(purity)
         return purity
 
-    def fit(self, x):
+    def fit(self, x, param_num=-1):
         """
         this function iteratively fits data x into k-means model. The result of
         the iteration is the cluster centers.
@@ -128,7 +132,7 @@ class KMeans():
         """
 
         # intialize self.centers
-        self.init_center(x)
+        self.init_center(x, param_num=-1)
 
         sse_vs_iter = []
         for iter in range(self.max_iter):

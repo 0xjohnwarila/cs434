@@ -82,6 +82,7 @@ def visualize(x_train, y_train):
     ##################################
     df = pd.DataFrame(dict(x=x_train[:,0], y=x_train[:,1], label=y_train))
 
+    save_path = "visualize"
     fld = os.path.join(args.root_dir, save_path)
     if not os.path.exists((fld)):
         os.mkdir(fld)
@@ -95,8 +96,8 @@ def visualize(x_train, y_train):
     ax.legend()
     plt.xlabel("Principle Component 1")
     plt.ylabel("Principle Component 2")
-    plt.show()
-    fig.savefig(os.path.join(fld, '%d_%d.png' % (pp[0], pp[-1])))
+    #plt.show()
+    fig.savefig(os.path.join(fld, 'plot.png'))
 
     print('Saved at : %s' % fld)
     # The first 2 of x_train will be the first and second principle components
@@ -104,7 +105,8 @@ def visualize(x_train, y_train):
     # Need to plot all points with respect two the first two PCs, coloring the
     # different classes.
 
-def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
+def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k,
+                 param_num=-1):
     print('kmeans\n')
     train_sses_vs_iter = []
     train_sses_vs_k = []
@@ -115,7 +117,7 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     ##################################
     for k in range(1, kmeans_max_k):
         kmeans = KMeans(k, kmeans_max_iter)
-        sse_vs_iter = kmeans.fit(x_train)
+        sse_vs_iter = kmeans.fit(x_train, param_num)
         train_sses_vs_iter.append(sse_vs_iter)
         train_purities_vs_k.append(kmeans.get_purity(x_train, y_train))
         train_sses_vs_k.append(min(sse_vs_iter))
@@ -133,7 +135,7 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     for i in range(5):
         sse_vs_iter = []
         kmeans = KMeans(6, kmeans_max_iter)
-        sse_vs_iter = kmeans.fit(x_train)
+        sse_vs_iter = kmeans.fit(x_train, param_num)
         train_sses_vs_iter = [sum(x) for x in zip(train_sses_vs_iter,
                                                   sse_vs_iter)]
 
@@ -149,7 +151,7 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
         train_sses_vs_k = []
         for k in range(1, 11):
             kmeans = KMeans(k, kmeans_max_iter)
-            sse_vs_iter = kmeans.fit(x_train)
+            sse_vs_iter = kmeans.fit(x_train, param_num)
             train_sses_vs_k.append(min(sse_vs_iter))
         avg_sses_vs_k = [sum(x) for x in zip(avg_sses_vs_k, train_sses_vs_k)]
 
@@ -164,7 +166,7 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
         train_purities_vs_k = []
         for k in range(1, 11):
             kmeans = KMeans(k, kmeans_max_iter)
-            sse_vs_iter = kmeans.fit(x_train)
+            sse_vs_iter = kmeans.fit(x_train, param_num)
             train_purities_vs_k.append(kmeans.get_purity(x_train, y_train))
         avg_purities_vs_k = [sum(x) for x in zip(train_purities_vs_k,
                                                  avg_purities_vs_k)]
@@ -186,6 +188,7 @@ if __name__ == '__main__':
         visualize(x_train, y_train)
 
     if args.kmeans == 1:
-        apply_kmeans(args.pca, x_train, y_train, args.kmeans_max_iter, args.kmeans_max_k)
+        apply_kmeans(args.pca, x_train, y_train, args.kmeans_max_iter,
+                     args.kmeans_max_k, param_num=len(pca.eig_vals))
 
     print('Done')

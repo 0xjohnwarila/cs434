@@ -81,18 +81,11 @@ class PCA():
             k_variance += eigval[eigidx[i]]
             i += 1
 
-        print(self.retain_ratio * total_var)
-        print('K Variance', k_variance)
         print(i)
-        print('max eigval', max(eigval))
-
         self.eig_vals = np.array([eigval[eigidx[j]] for j in range(i)])
         self.eig_vecs = np.ndarray((561, eigvec.shape[1]))
         for j in range(i):
             self.eig_vecs[:,j] = eigvec[:,eigidx[j]]
-
-        print(self.eig_vals)
-
 
     def transform(self, x):
         """
